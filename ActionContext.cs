@@ -11,7 +11,7 @@ namespace Jailbreak {
         public static Entity Projectile;
         public static Entity Target;
         public static int Cursor;
-        public static object[] parameters;
+        public static List<object> parameters;
         public static object lastReturn;
     }
 }

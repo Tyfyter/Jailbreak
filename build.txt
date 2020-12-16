@@ -4,6 +4,6 @@ displayName = Jailbreak
 homepage = https://tyfyter.github.io/
 hideCode = false
 hideResources = false
-includeSource = false
+includeSource = true
 
 buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*
