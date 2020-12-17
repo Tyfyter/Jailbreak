@@ -11,12 +11,13 @@ namespace Jailbreak.Items {
         public override float delay => 0;
         public int count;
         public override object Execute(int i) {
-            if(parameters[0].ToBool())ActionContext.Cursor+=count;
+            if(parameters[0].ToBool())ActionContext.Default.Cursor+=count;
             return null;
         }
         public override TagCompound Save() {
-            TagCompound o = new TagCompound();
-            o.Add("count", count);
+            TagCompound o = new TagCompound {
+                { "count", count }
+            };
             return o;
         }
         public override void Load(TagCompound tag) {

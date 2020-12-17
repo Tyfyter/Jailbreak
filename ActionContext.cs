@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 using Terraria;
 
 namespace Jailbreak {
-    public static class ActionContext {
-        public static Entity Caster;
-        public static Entity Projectile;
-        public static Entity Target;
-        public static int Cursor;
-        public static List<object> parameters;
-        public static object lastReturn;
+    public class ActionContext {
+        public static ActionContext Default;
+        public Entity Caster;
+        public Entity Projectile;
+        public Entity Target;
+        public int Cursor;
+        public float Delay;
+        public List<object> parameters;
+        public object lastReturn;
+        public ActionContext() {
+            parameters = new List<object>(){new object(),new object(),new object(),new object(),new object()};
+        }
     }
 }

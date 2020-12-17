@@ -33,7 +33,7 @@ namespace Jailbreak.Commands
                 string itemName;
                 ActionItem item;
                 string literal;
-                ActionContext.Caster = player.Player;
+                ActionContext.Default.Caster = player.Player;
                 for(int i = 0; i < args.Length; i++) {
                     mod.Logger.Info($"parsing \'{args[i]}\'");
                     itemName = args[i].Split('.')[0];
@@ -44,7 +44,7 @@ namespace Jailbreak.Commands
                         item.ApplyLiteral(literal);
                         mod.Logger.Info($"set literal of {item} to {literal}");
                     }
-                    ActionContext.lastReturn = item.Execute(0)??ActionContext.lastReturn;
+                    ActionContext.Default.lastReturn = item.Execute(0)??ActionContext.Default.lastReturn;
                 }
             /*}catch (Exception e){
                 Main.NewText(e.Message);

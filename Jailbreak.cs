@@ -21,6 +21,7 @@ namespace Jailbreak {
                 { "Vec2", new Vec2Literal() },
                 { "Vec3", new Vec3Literal() },
                 { "SetParameter", new SetParameterOperation() },
+                { "GetParameter", new GetParameterOperation() },
                 { "Add", new AddOperation() },
                 { "Sub", new SubtractOperation() },
                 { "Mul", new MultiplyOperation() },
@@ -36,12 +37,12 @@ namespace Jailbreak {
                 //AddItem(act.Value.GetType().Name, act.Value);
                 actions.Add(act.Value);
             }
-            ActionContext.parameters = new List<object>(){new object(),new object(),new object(),new object(),new object()};
+            ActionContext.Default = new ActionContext();
         }
         public override void Unload() {
             actions = null;
             Actions = null;
-            ActionContext.parameters = null;
+            ActionContext.Default = null;
         }
         public static string ConvertAlias(string alias) {
             List<char> chars = alias.ToCharArray().ToList();

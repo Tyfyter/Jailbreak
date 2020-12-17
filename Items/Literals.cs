@@ -16,8 +16,9 @@ namespace Jailbreak.Items {
             return value;
         }
         public override TagCompound Save() {
-            TagCompound o = new TagCompound();
-            o.Add("value", value);
+            TagCompound o = new TagCompound {
+                { "value", value }
+            };
             return o;
         }
         public override void Load(TagCompound tag) {

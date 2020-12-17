@@ -9,16 +9,20 @@ using System;
 
 namespace Jailbreak.Items{
     public class ActionItem : ModItem {
-        public List<object> parameters => ActionContext.parameters;
+        public List<object> parameters => ActionContext.Default.parameters;
         public virtual bool hasLiteral => false;
         public virtual ActionType Type => ActionType.Action;
         public virtual float cost => 0.1f;
         public virtual float delay => Type==ActionType.Action?1:0.1f;
+        public ActionContext context;
         public virtual object Execute(int i){return null;}
         public override bool Autoload(ref string name) {
             return false;
         }
         protected internal virtual void ApplyLiteral(string literal) {}
+        public ActionItem() {
+            context = ActionContext.Default;
+        }
     }
     /// <summary>
     /// see also <seealso cref="GetMotionOperation"/>

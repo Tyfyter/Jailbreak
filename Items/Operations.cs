@@ -14,21 +14,21 @@ namespace Jailbreak.Items {
         public override float cost => 0.25f;
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
-            return ActionContext.Caster;
+            return context.Caster;
         }
     }
     public class GetProjectileOperation : ActionItem {
         public override float cost => 0.25f;
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
-            return ActionContext.Projectile;
+            return context.Projectile;
         }
     }
     public class GetTargetOperation : ActionItem {
         public override float cost => 0.25f;
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
-            return ActionContext.Target;
+            return context.Target;
         }
     }
     public class NormalizeOperation : ActionItem {
@@ -97,6 +97,7 @@ namespace Jailbreak.Items {
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0.25f;
         public override object Execute(int i){
+            ModContent.GetInstance<Jailbreak>().Logger.Info(context.ToString());
             return ((Entity)parameters[0]).velocity;
         }
     }
@@ -106,13 +107,35 @@ namespace Jailbreak.Items {
         public override float cost => 0;
         public int index;
         public override object Execute(int i){
-            ModContent.GetInstance<Jailbreak>().Logger.Info($"set parameter {index} to {ActionContext.lastReturn}");
-            parameters[index] = ActionContext.lastReturn;
+            ModContent.GetInstance<Jailbreak>().Logger.Info($"set parameter {index} to {ActionContext.Default.lastReturn}");
+            parameters[index] = context.lastReturn;
             return null;
         }
         public override TagCompound Save() {
-            TagCompound o = new TagCompound();
-            o.Add("index", index);
+            TagCompound o = new TagCompound {
+                { "index", index }
+            };
+            return o;
+        }
+        public override void Load(TagCompound tag) {
+            index = tag.Get<int>("index");
+        }
+        protected internal override void ApplyLiteral(string literal) {
+            index = int.Parse(literal);
+        }
+    }
+    public class GetParameterOperation : ActionItem {
+        public override bool hasLiteral => true;
+        public override ActionType Type => ActionType.Operation;
+        public override float cost => 0;
+        public int index;
+        public override object Execute(int i){
+            return parameters[index];
+        }
+        public override TagCompound Save() {
+            TagCompound o = new TagCompound {
+                { "index", index }
+            };
             return o;
         }
         public override void Load(TagCompound tag) {
