@@ -28,7 +28,7 @@ namespace Jailbreak.Items{
     /// see also <seealso cref="GetMotionOperation"/>
     /// </summary>
     public class AddMotionAction : ActionItem {
-        public override float cost => ((Vector2)parameters[1]).Length();
+        public override float cost => ((Vector2)parameters[1]).Length()*(ReferenceEquals(parameters[0],context.Projectile)?0.25f:1);
         public override object Execute(int i){
             ModContent.GetInstance<Jailbreak>().Logger.Info(parameters[0].GetType());
             ModContent.GetInstance<Jailbreak>().Logger.Info(parameters[0] is Entity);

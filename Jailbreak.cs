@@ -15,13 +15,13 @@ namespace Jailbreak {
             Actions = new Dictionary<string, ActionItem>(){
                 { "Chat", new ChatAction() },
                 { "GetCaster", new GetCasterOperation() },
-                { "Number", new NumberLiteral() },
+                { "Num", new NumberLiteral() },
                 { "Bool", new BooleanLiteral() },
                 { "String", new StringLiteral() },
                 { "Vec2", new Vec2Literal() },
                 { "Vec3", new Vec3Literal() },
-                { "SetParameter", new SetParameterOperation() },
-                { "GetParameter", new GetParameterOperation() },
+                { "Set", new SetParameterOperation() },
+                { "Get", new GetParameterOperation() },
                 { "Add", new AddOperation() },
                 { "Sub", new SubtractOperation() },
                 { "Mul", new MultiplyOperation() },
@@ -30,7 +30,11 @@ namespace Jailbreak {
                 { "GetProjectile", new GetProjectileOperation() },
                 { "GetPosition", new GetPositionOperation() },
                 { "GetMotion", new GetMotionOperation() },
-                { "AddMotion", new AddMotionAction() }
+                { "AddMotion", new AddMotionAction() },
+                { "Push", new PushParameterOperation() },
+                { "Pop", new PopParameterOperation() },
+                { "Sleep", new SleepControl() },
+                { "Jump", new JumpIfControl() }
             };
             actions = new List<ActionItem>(){};
             foreach(KeyValuePair<string,ActionItem> act in Actions) {
@@ -54,6 +58,9 @@ namespace Jailbreak {
                 }
             }
             alias = new string(chars.ToArray());
+            alias = alias.Replace("SetParameter","Set");
+            alias = alias.Replace("GetParameter","Get");
+            alias = alias.Replace("Number","Num");
             alias = alias.Replace("Boolean","Bool");
             alias = alias.Replace("+","Add");
             alias = alias.Replace("Subtract","Sub");
@@ -68,6 +75,9 @@ namespace Jailbreak {
             alias = alias.Replace("^","Pow");
             alias = alias.Replace("Vector2","Vec2");
             alias = alias.Replace("Vector3","Vec3");
+            alias = alias.Replace("PushParameter","Push");
+            alias = alias.Replace("PopParameter","Pop");
+            alias = alias.Replace("JumpIf","Jump");
             return alias;
         }
         public static int AddAction(ActionItem action, string name) {

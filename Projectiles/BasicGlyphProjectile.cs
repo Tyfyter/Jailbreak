@@ -28,7 +28,7 @@ namespace Jailbreak.Projectiles {
                     item = actions[context.Cursor++];
                     item.context = context;
                     fail = context.Cursor>=actions.Count||(++cycleCount>255);
-                    if(true) {
+                    if(item.cost<=100) {
                         context.Delay+=item.delay;
                         ret = item.Execute(0);
                         context.lastReturn = ret??context.lastReturn;
@@ -41,6 +41,9 @@ namespace Jailbreak.Projectiles {
                     projectile.Kill();
                     return;
                 }*/
+            }
+            while(context.parameters.Count>16) {
+                context.parameters.RemoveAt(16);
             }
             context.Delay--;
         }

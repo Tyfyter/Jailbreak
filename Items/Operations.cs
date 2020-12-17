@@ -10,6 +10,9 @@ using Terraria.ModLoader.IO;
 using Terraria.ModLoader;
 
 namespace Jailbreak.Items {
+    /// <summary>
+    /// see also <seealso cref="GetProjectileOperation"/> and <seealso cref="GetTargetOperation"/>
+    /// </summary>
     public class GetCasterOperation : ActionItem {
         public override float cost => 0.25f;
         public override ActionType Type => ActionType.Operation;
@@ -17,6 +20,9 @@ namespace Jailbreak.Items {
             return context.Caster;
         }
     }
+    /// <summary>
+    /// see also <seealso cref="GetCasterOperation"/> and <seealso cref="GetTargetOperation"/>
+    /// </summary>
     public class GetProjectileOperation : ActionItem {
         public override float cost => 0.25f;
         public override ActionType Type => ActionType.Operation;
@@ -24,6 +30,9 @@ namespace Jailbreak.Items {
             return context.Projectile;
         }
     }
+    /// <summary>
+    /// see also <seealso cref="GetCasterOperation"/> and <seealso cref="GetProjectileOperation"/>
+    /// </summary>
     public class GetTargetOperation : ActionItem {
         public override float cost => 0.25f;
         public override ActionType Type => ActionType.Operation;
@@ -83,6 +92,42 @@ namespace Jailbreak.Items {
             return Math.Pow((float)parameters[0],(float)parameters[1]);
         }
     }
+    /// <summary>
+    /// see also <seealso cref="MaxOperation"/>
+    /// </summary>
+    public class MinOperation : ActionItem {
+        public override float cost => 0.1f;
+        public override ActionType Type => ActionType.Operation;
+        public override object Execute(int i){
+            if(parameters[0] is Vector2 vec2) {
+                float f = (float)parameters[1];
+                return vec2.Length()>f ?Vector2.Normalize(vec2)*f:vec2;
+            }
+            if(parameters[0] is Vector3 vec3) {
+                float f = (float)parameters[1];
+                return vec3.Length()>f ?Vector3.Normalize(vec3)*f:vec3;
+            }
+            return Math.Min((float)parameters[0],(float)parameters[1]);
+        }
+    }
+    /// <summary>
+    /// see also <seealso cref="MinOperation"/>
+    /// </summary>
+    public class MaxOperation : ActionItem {
+        public override float cost => 0.1f;
+        public override ActionType Type => ActionType.Operation;
+        public override object Execute(int i){
+            if(parameters[0] is Vector2 vec2) {
+                float f = (float)parameters[1];
+                return vec2.Length()<f ?Vector2.Normalize(vec2)*f:vec2;
+            }
+            if(parameters[0] is Vector3 vec3) {
+                float f = (float)parameters[1];
+                return vec3.Length()<f ?Vector3.Normalize(vec3)*f:vec3;
+            }
+            return Math.Max((float)parameters[0],(float)parameters[1]);
+        }
+    }
     public class GetPositionOperation : ActionItem {
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0.25f;
@@ -101,6 +146,9 @@ namespace Jailbreak.Items {
             return ((Entity)parameters[0]).velocity;
         }
     }
+    /// <summary>
+    /// see also <seealso cref="GetParameterOperation"/>
+    /// </summary>
     public class SetParameterOperation : ActionItem {
         public override bool hasLiteral => true;
         public override ActionType Type => ActionType.Operation;
@@ -124,6 +172,9 @@ namespace Jailbreak.Items {
             index = int.Parse(literal);
         }
     }
+    /// <summary>
+    /// see also <seealso cref="SetParameterOperation"/>
+    /// </summary>
     public class GetParameterOperation : ActionItem {
         public override bool hasLiteral => true;
         public override ActionType Type => ActionType.Operation;
@@ -153,14 +204,20 @@ namespace Jailbreak.Items {
             return ((ICollection)parameters[0]).Count;
         }
     }
+    /// <summary>
+    /// see also <seealso cref="PopParameterOperation"/>
+    /// </summary>
     public class PushParameterOperation : ActionItem {
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0f;
         public override object Execute(int i){
-            parameters.Insert(0,null);
+            parameters.Insert(0,context.lastReturn);
             return null;
         }
     }
+    /// <summary>
+    /// see also <seealso cref="PushParameterOperation"/>
+    /// </summary>
     public class PopParameterOperation : ActionItem {
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0f;
