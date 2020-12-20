@@ -45,7 +45,7 @@ namespace Jailbreak.Items {
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
             if(parameters[0] is Vector2 vec2)return vec2.SafeNormalize(default);
-            if(parameters[0] is Vector3 vec3)return Vector3.Normalize(vec3);
+            //if(parameters[0] is Vector3 vec3)return Vector3.Normalize(vec3);
             return Math.Sign((float)parameters[0]);
         }
     }
@@ -54,7 +54,8 @@ namespace Jailbreak.Items {
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
             if(parameters[0] is Vector2 vec2)return vec2+(Vector2)parameters[1];
-            if(parameters[0] is Vector3 vec3)return vec3+(Vector3)parameters[1];
+            if(parameters[1] is Vector2 vec2_1)return vec2_1+(Vector2)parameters[0];
+            //if(parameters[0] is Vector3 vec3)return vec3+(Vector3)parameters[1];
             return (float)parameters[0]+(float)parameters[1];
         }
     }
@@ -63,7 +64,8 @@ namespace Jailbreak.Items {
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
             if(parameters[0] is Vector2 vec2)return vec2-(Vector2)parameters[1];
-            if(parameters[0] is Vector3 vec3)return vec3-(Vector3)parameters[1];
+            if(parameters[1] is Vector2 vec2_1)return (Vector2)parameters[0]-vec2_1;
+            //if(parameters[0] is Vector3 vec3)return vec3-(Vector3)parameters[1];
             return (float)parameters[0]-(float)parameters[1];
         }
     }
@@ -72,7 +74,8 @@ namespace Jailbreak.Items {
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
             if(parameters[0] is Vector2 vec2)return vec2*((parameters[1] as Vector2?)??new Vector2((float)parameters[1]));
-            if(parameters[0] is Vector3 vec3)return vec3*((parameters[1] as Vector3?)??new Vector3((float)parameters[1]));
+            if(parameters[1] is Vector2 vec2_1)return vec2_1*((parameters[0] as Vector2?)??new Vector2((float)parameters[0]));
+            //if(parameters[0] is Vector3 vec3)return vec3*((parameters[1] as Vector3?)??new Vector3((float)parameters[1]));
             return (float)parameters[0]-(float)parameters[1];
         }
     }
@@ -81,7 +84,8 @@ namespace Jailbreak.Items {
         public override ActionType Type => ActionType.Operation;
         public override object Execute(int i){
             if(parameters[0] is Vector2 vec2)return vec2/((parameters[1] as Vector2?)??new Vector2((float)parameters[1]));
-            if(parameters[0] is Vector3 vec3)return vec3/((parameters[1] as Vector3?)??new Vector3((float)parameters[1]));
+            if(parameters[1] is Vector2 vec2_1)return ((parameters[0] as Vector2?)??new Vector2((float)parameters[0]))/vec2_1;
+            //if(parameters[0] is Vector3 vec3)return vec3/((parameters[1] as Vector3?)??new Vector3((float)parameters[1]));
             return (float)parameters[0]-(float)parameters[1];
         }
     }
@@ -103,10 +107,14 @@ namespace Jailbreak.Items {
                 float f = (float)parameters[1];
                 return vec2.Length()>f ?Vector2.Normalize(vec2)*f:vec2;
             }
-            if(parameters[0] is Vector3 vec3) {
+            if(parameters[1] is Vector2 vec2_1) {
+                float f = (float)parameters[0];
+                return vec2_1.Length()>f ?Vector2.Normalize(vec2_1)*f:vec2_1;
+            }
+            /*if(parameters[0] is Vector3 vec3) {
                 float f = (float)parameters[1];
                 return vec3.Length()>f ?Vector3.Normalize(vec3)*f:vec3;
-            }
+            }*/
             return Math.Min((float)parameters[0],(float)parameters[1]);
         }
     }
@@ -121,10 +129,14 @@ namespace Jailbreak.Items {
                 float f = (float)parameters[1];
                 return vec2.Length()<f ?Vector2.Normalize(vec2)*f:vec2;
             }
-            if(parameters[0] is Vector3 vec3) {
+            if(parameters[1] is Vector2 vec2_1) {
+                float f = (float)parameters[0];
+                return vec2_1.Length()<f ?Vector2.Normalize(vec2_1)*f:vec2_1;
+            }
+            /*if(parameters[0] is Vector3 vec3) {
                 float f = (float)parameters[1];
                 return vec3.Length()<f ?Vector3.Normalize(vec3)*f:vec3;
-            }
+            }*/
             return Math.Max((float)parameters[0],(float)parameters[1]);
         }
     }
@@ -168,8 +180,9 @@ namespace Jailbreak.Items {
         public override void Load(TagCompound tag) {
             index = tag.Get<int>("index");
         }
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             index = int.Parse(literal);
+            return this;
         }
     }
     /// <summary>
@@ -192,8 +205,9 @@ namespace Jailbreak.Items {
         public override void Load(TagCompound tag) {
             index = tag.Get<int>("index");
         }
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             index = int.Parse(literal);
+            return this;
         }
     }
     public class GetListSizeOperation : ActionItem {

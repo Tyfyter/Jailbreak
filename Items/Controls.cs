@@ -23,11 +23,37 @@ namespace Jailbreak.Items {
         public override void Load(TagCompound tag) {
             count = tag.Get<int>("count");
         }
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             count = int.Parse(literal);
+            return this;
         }
     }
     public class SleepControl : ActionItem {
         public override float delay => (float)parameters[0];
+    }
+    public class GotoControl : ActionItem {
+        public override bool hasLiteral => true;
+        public override float delay => 0;
+        public int? target;
+        public override object Execute(int i) {
+            ActionContext.Default.Cursor = target??(int)parameters[0];
+            return null;
+        }
+        public override TagCompound Save() {
+            TagCompound o = new TagCompound();
+            if(target.HasValue)o.Add("target",target.Value);
+            return o;
+        }
+        public override void Load(TagCompound tag) {
+            if(tag.ContainsKey("target"))target = tag.Get<int>("target");
+        }
+        protected internal override ActionItem ApplyLiteral(string literal) {
+            if(literal.Equals("null")) {
+                target = null;
+                return this;
+            }
+            target = int.Parse(literal);
+            return this;
+        }
     }
 }

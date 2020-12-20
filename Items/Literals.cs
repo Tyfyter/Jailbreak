@@ -26,30 +26,34 @@ namespace Jailbreak.Items {
         }
     }
     public class NumberLiteral : Literal<float> {
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             value = float.Parse(literal);
+            return this;
         }
     }
     public class BooleanLiteral : Literal<bool> {
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             value = bool.Parse(literal);
+            return this;
         }
     }
     public class StringLiteral : Literal<string> {
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             value = literal;
+            return this;
         }
     }
     public class Vec2Literal : Literal<Vector2> {
-        protected internal override void ApplyLiteral(string literal) {
+        protected internal override ActionItem ApplyLiteral(string literal) {
             string[] literals = literal.Split(',');
             value = new Vector2(float.Parse(literals[0]),float.Parse(literals[1]));
+            return this;
         }
     }
-    public class Vec3Literal : Literal<Vector3> {
+    /*public class Vec3Literal : Literal<Vector3> {
         protected internal override void ApplyLiteral(string literal) {
             string[] literals = literal.Split(',');
             value = new Vector3(float.Parse(literals[0]),float.Parse(literals[1]),float.Parse(literals[2]));
         }
-    }
+    }*/
 }

@@ -48,7 +48,7 @@ namespace Jailbreak.Commands
                 item = Jailbreak.GetAction(itemName);
                 if(item.hasLiteral) {
                     literal = args[i].Substring(itemName.Length+1);
-                    item = (ActionItem)item.NewInstance(null);
+                    item = Jailbreak.CreateNew(item);
                     item.ApplyLiteral(literal);
                     mod.Logger.Info($"set literal of {item} to {literal}");
                 }

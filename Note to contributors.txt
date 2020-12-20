@@ -1,0 +1,4 @@
+All Action/Operation/Control/Literal sprite are placeholders
+
+As for my naming conventions:
+https://xkcd.com/163/

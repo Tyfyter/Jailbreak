@@ -6,6 +6,7 @@ using Terraria.ModLoader;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.Text.RegularExpressions;
 
 namespace Jailbreak.Items{
     public class ActionItem : ModItem {
@@ -16,12 +17,54 @@ namespace Jailbreak.Items{
         public virtual float delay => Type==ActionType.Action?1:0.1f;
         public ActionContext context;
         public virtual object Execute(int i){return null;}
+		public override void AutoStaticDefaults() {
+            try {
+                /*switch(Type) {
+                    case ActionType.Literal:
+                    Main.itemTexture[item.type] = ModContent.GetTexture("Literal");
+                    break;
+                    default:*/
+                Main.itemTexture[item.type] = ModContent.GetTexture("Jailbreak/"+Type.ToString()+"s/"+Name.Replace(Type.ToString(), ""));
+                /*break;
+            }*/
+            } catch(Exception) {
+                Main.itemTexture[item.type] = ModContent.GetTexture("Jailbreak/Empty");
+            }
+
+			if (DisplayName.IsDefault())DisplayName.SetDefault(Regex.Replace(Name, "(?<!^)([A-Z])", " $1").Trim());
+		}
         public override bool Autoload(ref string name) {
             return false;
         }
-        protected internal virtual void ApplyLiteral(string literal) {}
+        protected internal virtual ActionItem ApplyLiteral(string literal) { return this; }
         public ActionItem() {
             context = ActionContext.Default;
+        }
+        public override bool CanRightClick() {
+            return hasLiteral;
+        }
+        public override bool ConsumeItem(Player player) {
+            return false;
+        }
+
+        public override bool Equals(object obj) => (obj is ActionItem)?(ActionItem)obj == this:false;
+
+        /// <summary>
+        /// override this if an action class contains data
+        /// </summary>
+        /// <returns>true</returns>
+        protected virtual bool Equals(ActionItem other) {
+            return true;
+        }
+        public static bool operator ==(ActionItem a, ActionItem b) {
+            if(a is null)return b is null;
+            if(b is null)return false;//a can never be null here
+            return (a.GetType()==b.GetType())?a.Equals(b):false;
+        }
+        public static bool operator !=(ActionItem a, ActionItem b) {
+            if(a is null)return !(b is null);
+            if(b is null)return true;//a can never be null here
+            return (a.GetType()==b.GetType())?!a.Equals(b):true;
         }
     }
     /// <summary>
