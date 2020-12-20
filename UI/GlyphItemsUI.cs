@@ -35,7 +35,7 @@ namespace Jailbreak.UI {
                 Top = { Pixels = (float)((Main.screenHeight*0.4)+(layers*40*scale.Y)) },
                 ValidItemFunc = item => item.IsAir || (!item.IsAir && (item.modItem is ActionItem))
 				};
-                if(xPos*40*scale.X>Main.screenWidth/2) {
+                if(xPos*40*scale.X>Main.screenWidth*0.4) {
                     xPos = 0;
                     layers++;
                 }
@@ -72,12 +72,25 @@ namespace Jailbreak.UI {
         }
         public void UpdateItems(){
             //List<ActionItem> actions = new List<ActionItem>(){};
-            drive.Actions.Clear();
-			for(int i = 0; i < itemSlots.Count; i++)drive.Actions.Add(itemSlots[i].Item.modItem as ActionItem);
+            lock(drive.Actions){
+                drive.Actions.Clear();
+                ActionItem item;
+                for(int i = 0; i < itemSlots.Count; i++) {
+                    item = itemSlots[i].Item.modItem as ActionItem;
+                    if(item!=null) {
+                        drive.Actions.Add(item);
+                    }
+                }
+                if((itemSlots.Count>0&&!itemSlots[itemSlots.Count-1].Item.IsAir)||(itemSlots.Count>1&&itemSlots[itemSlots.Count-2].Item.IsAir)) {
+                    resizeSlotList();
+                }
+            }
+            //drive.actions = actions;
+		}
+        protected void resizeSlotList() {
             RemoveAllChildren();
             itemSlots = new List<VanillaItemSlotWrapper>(){};
             OnInitialize();
-            //drive.actions = actions;
-		}
+        }
     }
 }

@@ -17,9 +17,13 @@ namespace Jailbreak.Items {
         }
         public bool Readonly => false;
         public override TagCompound Save() {
-            return new TagCompound() {
-                {"actions", Actions.Select((i)=>i.item??Jailbreak.CreateNew(i).item).ToList()}
-            };
+            try {
+                return new TagCompound() {
+                    {"actions", Actions.Select((i)=>i.item??Jailbreak.CreateNew(i).item).ToList()}
+                };
+            } catch(Exception) {
+                return new TagCompound();
+            }
         }
         public override void Load(TagCompound tag) {
             if(tag.ContainsKey("actions")) {

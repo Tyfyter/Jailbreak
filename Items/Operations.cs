@@ -167,7 +167,7 @@ namespace Jailbreak.Items {
         public override float cost => 0;
         public int index;
         public override object Execute(int i){
-            ModContent.GetInstance<Jailbreak>().Logger.Info($"set parameter {index} to {ActionContext.Default.lastReturn}");
+            ModContent.GetInstance<Jailbreak>().Logger.Info($"set parameter {index} to {context.lastReturn}");
             parameters[index] = context.lastReturn;
             return null;
         }
@@ -226,6 +226,7 @@ namespace Jailbreak.Items {
         public override float cost => 0f;
         public override object Execute(int i){
             parameters.Insert(0,context.lastReturn);
+            mod.Logger.Info($"pushed, parameters now [{string.Join(", ", parameters)}]");
             return null;
         }
     }
@@ -238,6 +239,7 @@ namespace Jailbreak.Items {
         public override object Execute(int i){
             object o = parameters[0];
             parameters.RemoveAt(0);
+            mod.Logger.Info($"popped, parameters now [{string.Join(", ", parameters)}]");
             return o;
         }
     }

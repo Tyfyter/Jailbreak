@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace Jailbreak.Items{
     public class ActionItem : ModItem {
-        public List<object> parameters => ActionContext.Default.parameters;
+        public List<object> parameters => context.parameters;
         public virtual bool hasLiteral => false;
         public virtual ActionType Type => ActionType.Action;
         public virtual float cost => 0.1f;
@@ -56,6 +56,14 @@ namespace Jailbreak.Items{
         protected virtual bool Equals(ActionItem other) {
             return true;
         }
+
+        public override int GetHashCode() {
+            var hashCode = 440132047;
+            hashCode=hashCode*-1521134295+hasLiteral.GetHashCode();
+            hashCode=hashCode*-1521134295+Type.GetHashCode();
+            return hashCode;
+        }
+
         public static bool operator ==(ActionItem a, ActionItem b) {
             if(a is null)return b is null;
             if(b is null)return false;//a can never be null here
