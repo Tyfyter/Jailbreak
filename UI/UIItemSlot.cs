@@ -20,6 +20,7 @@ namespace Jailbreak.UI
 		internal readonly int color;
 		private readonly float _scale;
 		internal Func<Item, bool> ValidItemFunc;
+        protected internal int index = -1;
 		public VanillaItemSlotWrapper(int colorContext = ItemSlot.Context.CraftingMaterial, int context = ItemSlot.Context.InventoryItem, float scale = 1f, Item item = null) {
 			color = colorContext;
             _context = context;
@@ -51,9 +52,15 @@ namespace Jailbreak.UI
 					ItemSlot.Handle(ref Item, _context);
                     ActionItem item2 = null;
                     if(Item?.modItem is ActionItem action2) item2 = action2;
+                    GlyphItemsUI parent = ((GlyphItemsUI)Parent);
                     if(item!=item2) {
-                        ((GlyphItemsUI)Parent).dirty = true;
+                        parent.driveDirty = true;
+                    } else if(ActionItem.rightClicked&&item!=null) {
+                        parent.literalIndex = index;
+                        parent.LiteralTarget = item;
+                        //Jailbreak.instance.literalUI.SetState(actionLiteralUI);
                     }
+                    ActionItem.rightClicked = false;
 					/*try {
 						((GunItemsUI)Parent).UpdateItem();
 					}catch (System.Exception){}*/

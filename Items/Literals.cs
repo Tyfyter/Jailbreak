@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
 using Terraria.ModLoader.IO;
 
 namespace Jailbreak.Items {
@@ -24,16 +25,19 @@ namespace Jailbreak.Items {
         public override void Load(TagCompound tag) {
             value = tag.Get<T>("value");
         }
+        protected internal override string GetLiteral() {
+            return value+"";
+        }
     }
     public class NumberLiteral : Literal<float> {
         protected internal override ActionItem ApplyLiteral(string literal) {
-            value = float.Parse(literal);
+            float.TryParse(literal, out value);
             return this;
         }
     }
     public class BooleanLiteral : Literal<bool> {
         protected internal override ActionItem ApplyLiteral(string literal) {
-            value = bool.Parse(literal);
+            bool.TryParse(literal, out value);
             return this;
         }
     }

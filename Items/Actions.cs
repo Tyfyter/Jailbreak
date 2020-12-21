@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System;
 using System.Text.RegularExpressions;
+using Jailbreak.UI;
 
 namespace Jailbreak.Items{
     public class ActionItem : ModItem {
@@ -16,6 +17,7 @@ namespace Jailbreak.Items{
         public virtual float cost => 0.1f;
         public virtual float delay => Type==ActionType.Action?1:0.1f;
         public ActionContext context;
+        protected internal static bool rightClicked = false;
         public virtual object Execute(int i){return null;}
 		public override void AutoStaticDefaults() {
             try {
@@ -37,14 +39,22 @@ namespace Jailbreak.Items{
             return false;
         }
         protected internal virtual ActionItem ApplyLiteral(string literal) { return this; }
+        protected internal void SetLiteral(string literal) { ApplyLiteral(literal); }
+        protected internal virtual string GetLiteral() { return ""; }
         public ActionItem() {
             context = ActionContext.Default;
+        }
+        public override void UpdateInventory(Player player) {
+            rightClicked = false;
         }
         public override bool CanRightClick() {
             return hasLiteral;
         }
         public override bool ConsumeItem(Player player) {
             return false;
+        }
+        public override void RightClick(Player player) {
+            rightClicked = true;
         }
 
         public override bool Equals(object obj) => (obj is ActionItem)?(ActionItem)obj == this:false;

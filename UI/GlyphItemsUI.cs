@@ -10,12 +10,16 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using Jailbreak.Items;
 using System;
+using System.Linq;
 
 namespace Jailbreak.UI {
 	public class GlyphItemsUI : UIState {
         public List<VanillaItemSlotWrapper> itemSlots = new List<VanillaItemSlotWrapper>(){};
         public DriveItem drive;
-        protected internal bool dirty = false;
+        protected internal bool driveDirty = false;
+        protected internal int literalIndex = -1;
+        protected internal ActionItem LiteralTarget;
+		public LiteralElement literalUI;
         public override void OnInitialize(){
             int l = 1;
             if(drive!=null){
@@ -30,10 +34,11 @@ namespace Jailbreak.UI {
                 xPos++;
                 if(i>=itemSlots.Count)itemSlots.Add(null);
                 current = drive.Actions.Count>i?drive.Actions[i]:null;
-                itemSlots[i] = new VanillaItemSlotWrapper(scale:0.75f,context:drive.Readonly?ItemSlot.Context.CraftingMaterial:ItemSlot.Context.InventoryItem){
-				Left = { Pixels = (float)((Main.screenWidth*0.05)+(xPos*40*scale.X)) },
-                Top = { Pixels = (float)((Main.screenHeight*0.4)+(layers*40*scale.Y)) },
-                ValidItemFunc = item => item.IsAir || (!item.IsAir && (item.modItem is ActionItem))
+                itemSlots[i] = new VanillaItemSlotWrapper(scale: 0.75f, context: drive.Readonly ? ItemSlot.Context.CraftingMaterial : ItemSlot.Context.InventoryItem) {
+                    Left = { Pixels = (float)((Main.screenWidth*0.05)+(xPos*40*scale.X)) },
+                    Top = { Pixels = (float)((Main.screenHeight*0.4)+(layers*40*scale.Y)) },
+                    ValidItemFunc = item => item.IsAir || (!item.IsAir && (item.modItem is ActionItem)),
+                    index = i
 				};
                 if(xPos*40*scale.X>Main.screenWidth*0.4) {
                     xPos = 0;
@@ -68,9 +73,37 @@ namespace Jailbreak.UI {
             if(dirty)UpdateItems();
         }//*/
         public override void Update(GameTime gameTime) {
-            if(dirty&&drive!=null)UpdateItems();
+            if(driveDirty&&drive!=null)UpdateItems();
+            if(literalIndex!=-1)UpdateLiteralEditor();
+        }
+        public void UpdateLiteralEditor() {
+            int index = literalIndex;
+            literalIndex = -1;
+            if(literalUI!=null) {
+                literalUI.Deactivate();
+                RemoveChild(literalUI);
+            }
+            if(LiteralTarget == null) {
+                return;
+            }
+            Main.UIScaleMatrix.Decompose(out Vector3 scale, out Quaternion ignore, out Vector3 ignore2);
+            VanillaItemSlotWrapper slot = itemSlots[index];
+            LiteralElement actionLiteralUI = literalUI = new LiteralElement(scale.X*0.75f) {
+                Left = { Pixels = slot.Left.Pixels },
+                Top = {
+                    Pixels = slot.Top.Pixels - slot.Height.Pixels/2
+                }
+            };
+            //actionLiteralUI.Top.Pixels = this.Top.Pixels - actionLiteralUI.Height.Pixels*1.25f;
+            actionLiteralUI.setValue = LiteralTarget.SetLiteral;
+            actionLiteralUI.getValue = LiteralTarget.GetLiteral;
+            actionLiteralUI.value = LiteralTarget.GetLiteral();
+            actionLiteralUI.Activate();
+            Append(actionLiteralUI);
+            LiteralTarget = null;
         }
         public void UpdateItems(){
+            driveDirty = false;
             //List<ActionItem> actions = new List<ActionItem>(){};
             lock(drive.Actions){
                 drive.Actions.Clear();
@@ -82,12 +115,12 @@ namespace Jailbreak.UI {
                     }
                 }
                 if((itemSlots.Count>0&&!itemSlots[itemSlots.Count-1].Item.IsAir)||(itemSlots.Count>1&&itemSlots[itemSlots.Count-2].Item.IsAir)) {
-                    resizeSlotList();
+                    ResizeSlotList();
                 }
             }
             //drive.actions = actions;
 		}
-        protected void resizeSlotList() {
+        protected void ResizeSlotList() {
             RemoveAllChildren();
             itemSlots = new List<VanillaItemSlotWrapper>(){};
             OnInitialize();

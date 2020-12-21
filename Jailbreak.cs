@@ -1,6 +1,7 @@
 using Jailbreak.Items;
 using Jailbreak.UI;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,9 @@ namespace Jailbreak {
         internal static Jailbreak Instance => instance;
 
 		internal UserInterface UI;
+		//internal UserInterface literalUI;
 		public GlyphItemsUI glyphItemUI;
+        public static Texture2D LiteralBackTexture;
 
 		public Jailbreak() {}
         public override void Load() {
@@ -55,13 +58,22 @@ namespace Jailbreak {
             ActionContext.Default = new ActionContext();
 			if (!Main.dedServ){
 				UI = new UserInterface();
+                LiteralBackTexture = GetTexture("UI/Literal_Back");
 			}
         }
         public override void Unload() {
             actions = null;
             Actions = null;
+            UI = null;
+            glyphItemUI = null;
             ActionContext.Default = null;
+            LiteralBackTexture = null;
             instance = null;
+        }
+        public override void PostUpdateInput() {
+            if(glyphItemUI?.literalUI is LiteralElement element && LiteralElement.focused) {
+                element.DoKeyboardInput();
+            }
         }
         public static ActionItem CreateNew(ActionItem old) {
             Item item = new Item();

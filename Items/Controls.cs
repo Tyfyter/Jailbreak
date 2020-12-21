@@ -24,8 +24,11 @@ namespace Jailbreak.Items {
             count = tag.Get<int>("count");
         }
         protected internal override ActionItem ApplyLiteral(string literal) {
-            count = int.Parse(literal);
+            int.TryParse(literal, out count);
             return this;
+        }
+        protected internal override string GetLiteral() {
+            return count+"";
         }
     }
     public class SleepControl : ActionItem {
@@ -44,8 +47,11 @@ namespace Jailbreak.Items {
                 time = null;
                 return this;
             }
-            time = float.Parse(literal);
+            if(float.TryParse(literal, out float targ))time = targ;
             return this;
+        }
+        protected internal override string GetLiteral() {
+            return time.HasValue?time.Value+"":"null";
         }
     }
     public class GotoControl : ActionItem {
@@ -70,8 +76,11 @@ namespace Jailbreak.Items {
                 target = null;
                 return this;
             }
-            target = int.Parse(literal);
+            if(int.TryParse(literal, out int targ))target = targ;
             return this;
+        }
+        protected internal override string GetLiteral() {
+            return target.HasValue?target.Value+"":"null";
         }
     }
 }

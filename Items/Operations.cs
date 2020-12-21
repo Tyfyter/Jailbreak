@@ -181,8 +181,11 @@ namespace Jailbreak.Items {
             index = tag.Get<int>("index");
         }
         protected internal override ActionItem ApplyLiteral(string literal) {
-            index = int.Parse(literal);
+            int.TryParse(literal, out index);
             return this;
+        }
+        protected internal override string GetLiteral() {
+            return index+"";
         }
     }
     /// <summary>
@@ -206,8 +209,11 @@ namespace Jailbreak.Items {
             index = tag.Get<int>("index");
         }
         protected internal override ActionItem ApplyLiteral(string literal) {
-            index = int.Parse(literal);
+            int.TryParse(literal, out index);
             return this;
+        }
+        protected internal override string GetLiteral() {
+            return index+"";
         }
     }
     public class GetListSizeOperation : ActionItem {
