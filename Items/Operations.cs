@@ -181,7 +181,7 @@ namespace Jailbreak.Items {
             index = tag.Get<int>("index");
         }
         protected internal override ActionItem ApplyLiteral(string literal) {
-            int.TryParse(literal, out index);
+            if(int.TryParse(literal, out int i))index = i;
             return this;
         }
         protected internal override string GetLiteral() {
@@ -209,7 +209,7 @@ namespace Jailbreak.Items {
             index = tag.Get<int>("index");
         }
         protected internal override ActionItem ApplyLiteral(string literal) {
-            int.TryParse(literal, out index);
+            if(int.TryParse(literal, out int i))index = i;
             return this;
         }
         protected internal override string GetLiteral() {

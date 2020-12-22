@@ -13,6 +13,7 @@ using Terraria.ModLoader.UI;
 using System.Collections;
 using ReLogic.Graphics;
 using Terraria.GameInput;
+using Microsoft.Xna.Framework.Input;
 
 namespace Jailbreak.UI {
     public class LiteralElement : UIElement {
@@ -25,11 +26,22 @@ namespace Jailbreak.UI {
 			Width.Set(Jailbreak.LiteralBackTexture.Width * scale, 0f);
 			Height.Set(Jailbreak.LiteralBackTexture.Height * scale, 0f);
         }
+        /*public override void Update(GameTime gameTime) {
+            if(focused)DoKeyboardInput();
+        }*/
         internal void DoKeyboardInput() {
+	        KeyboardState state = Keyboard.GetState();
+            string oldValue = value;
+            Main.hasFocus = true;
+            Main.instance.HandleIME();
             value = Main.GetInputText(value);
-            try {
+            if(!oldValue.Equals(value))try {
                 setValue(value);
             } catch(Exception) {}
+            if(Main.inputTextEnter) {
+                focused = false;
+                value = getValue();
+            }
         }
         private void DoInput() {
             bool clicking = Main.mouseLeftRelease && Main.mouseLeft;
@@ -42,7 +54,9 @@ namespace Jailbreak.UI {
                 focused = true;
             }
 			//Main.blockInput = focused;
+            PlayerInput.WritingText = focused;
             Main.editSign = focused;
+            Main.hasFocus = focused;
         }
         public override void OnDeactivate() {
             base.OnDeactivate();
@@ -50,7 +64,9 @@ namespace Jailbreak.UI {
             getValue = null;
             if(focused) {
                 //Main.blockInput = false;
+                PlayerInput.WritingText = false;
                 Main.editSign = false;
+                Main.hasFocus = false;
             }
             focused = false;
         }

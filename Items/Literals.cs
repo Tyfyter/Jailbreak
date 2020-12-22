@@ -31,13 +31,13 @@ namespace Jailbreak.Items {
     }
     public class NumberLiteral : Literal<float> {
         protected internal override ActionItem ApplyLiteral(string literal) {
-            float.TryParse(literal, out value);
+            if(float.TryParse(literal, out float val))value = val;
             return this;
         }
     }
     public class BooleanLiteral : Literal<bool> {
         protected internal override ActionItem ApplyLiteral(string literal) {
-            bool.TryParse(literal, out value);
+            if(bool.TryParse(literal, out bool val))value = val;
             return this;
         }
     }

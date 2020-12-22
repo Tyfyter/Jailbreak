@@ -24,7 +24,7 @@ namespace Jailbreak.Items {
             count = tag.Get<int>("count");
         }
         protected internal override ActionItem ApplyLiteral(string literal) {
-            int.TryParse(literal, out count);
+            if(int.TryParse(literal, out int c))count = c;
             return this;
         }
         protected internal override string GetLiteral() {

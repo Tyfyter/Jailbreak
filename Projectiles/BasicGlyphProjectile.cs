@@ -33,13 +33,6 @@ namespace Jailbreak.Projectiles {
             while(context.Delay<1&&(glyphType&GlyphProjectileType.Paused)==0) {
                 try {
                     fail = context.Cursor>=actions.Count||(++cycleCount>255);
-                    item = actions[context.Cursor++];
-                    item.context = context;
-                    if(item.cost<=100) {
-                        context.Delay+=item.delay;
-                        ret = item.Execute(glyphType);
-                        context.lastReturn = ret??context.lastReturn;
-                    }
                     if(fail) {
                         if((glyphType&GlyphProjectileType.Repeat)!=0) {
                             context.Cursor = 0;
@@ -48,8 +41,15 @@ namespace Jailbreak.Projectiles {
                             }
                         } else {
                             projectile.Kill();
-                            return;
                         }
+                        return;
+                    }
+                    item = actions[context.Cursor++];
+                    item.context = context;
+                    if(item.cost<=100) {
+                        context.Delay+=item.delay;
+                        ret = item.Execute(glyphType);
+                        context.lastReturn = ret??context.lastReturn;
                     }
                 } catch(Exception) {
                     projectile.Kill();
@@ -62,6 +62,7 @@ namespace Jailbreak.Projectiles {
             if((glyphType&GlyphProjectileType.Paused)==0)context.Delay--;
         }
         public override void OnHitNPC(NPC target, int damage, float knockback, bool crit) {
+            context.Target = target;
             if((glyphType&(Paused|OnHit))==(Paused|OnHit))glyphType^=GlyphProjectileType.Paused;
         }
         public override void Kill(int timeLeft) {
