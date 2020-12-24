@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using Jailbreak.Items;
 using static Jailbreak.Projectiles.GlyphProjectileType;
+using static Jailbreak.JailbreakExt;
 
 namespace Jailbreak.Projectiles {
     public class BasicGlyphProjectile : ModProjectile {
@@ -24,12 +25,13 @@ namespace Jailbreak.Projectiles {
         public override void AI() {
             ActionItem item;
             bool fail;
-            context.Caster = Main.player[projectile.owner];
+            if(context.Caster is null)context.Caster = Main.player[projectile.owner];
             int cycleCount = 0;
             object ret;
             if((glyphType&GlyphProjectileType.Tracer)!=0) {
                 Dust.NewDustPerfect(projectile.Center, 267, new Vector2(projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f), 100, new Color(0,90,255), 0.75f).noGravity = true;
             }
+            RefWrapper<float> charge = context.charge;
             while(context.Delay<1&&(glyphType&GlyphProjectileType.Paused)==0) {
                 try {
                     fail = context.Cursor>=actions.Count||(++cycleCount>255);
@@ -46,10 +48,17 @@ namespace Jailbreak.Projectiles {
                     }
                     item = actions[context.Cursor++];
                     item.context = context;
-                    if(item.cost<=100) {
-                        context.Delay+=item.delay;
+                    if(item.cost<=(charge?.value??100)) {
+                        if(!(charge is null)) charge.value-=item.cost;
+                        float delay = item.delay;
+                        if(!(item is SleepControl)) {//if anyone has a reason why this should be a property instead of being uniqe to SleepControl, please tell me
+                            delay*=context.delayMult;
+                        }
+                        context.Delay+=delay;
                         ret = item.Execute(glyphType);
                         context.lastReturn = ret??context.lastReturn;
+                    } else {
+                        context.Cursor = actions.Count;
                     }
                 } catch(Exception) {
                     projectile.Kill();

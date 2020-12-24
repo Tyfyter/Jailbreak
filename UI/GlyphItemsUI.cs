@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Jailbreak.UI {
 	public class GlyphItemsUI : UIState {
-        public List<VanillaItemSlotWrapper> itemSlots = new List<VanillaItemSlotWrapper>(){};
+        public List<GlyphItemSlot> itemSlots = new List<GlyphItemSlot>(){};
         public DriveItem drive;
         protected internal bool driveDirty = false;
         protected internal int literalIndex = -1;
@@ -31,11 +31,10 @@ namespace Jailbreak.UI {
             int layers = 0;
             int xPos = 0;
             for (int i = 0; i < l; i++){
-                xPos++;
                 if(i>=itemSlots.Count)itemSlots.Add(null);
                 current = drive.Actions.Count>i?drive.Actions[i]:null;
-                itemSlots[i] = new VanillaItemSlotWrapper(scale: 0.75f, context: drive.Readonly ? ItemSlot.Context.CraftingMaterial : ItemSlot.Context.InventoryItem) {
-                    Left = { Pixels = (float)((Main.screenWidth*0.05)+(xPos*40*scale.X)) },
+                itemSlots[i] = new GlyphItemSlot(scale: 0.75f, context: drive.Readonly ? ItemSlot.Context.CraftingMaterial : ItemSlot.Context.InventoryItem) {
+                    Left = { Pixels = (float)((Main.screenWidth*0.05)+(xPos++*40*scale.X)) },
                     Top = { Pixels = (float)((Main.screenHeight*0.4)+(layers*40*scale.Y)) },
                     ValidItemFunc = item => item.IsAir || (!item.IsAir && (item.modItem is ActionItem)),
                     index = i
@@ -87,7 +86,7 @@ namespace Jailbreak.UI {
                 return;
             }
             Main.UIScaleMatrix.Decompose(out Vector3 scale, out Quaternion ignore, out Vector3 ignore2);
-            VanillaItemSlotWrapper slot = itemSlots[index];
+            GlyphItemSlot slot = itemSlots[index];
             LiteralElement actionLiteralUI = literalUI = new LiteralElement(scale.X*0.75f) {
                 Left = { Pixels = slot.Left.Pixels },
                 Top = {
@@ -122,7 +121,7 @@ namespace Jailbreak.UI {
 		}
         protected void ResizeSlotList() {
             RemoveAllChildren();
-            itemSlots = new List<VanillaItemSlotWrapper>(){};
+            itemSlots = new List<GlyphItemSlot>(){};
             OnInitialize();
         }
     }

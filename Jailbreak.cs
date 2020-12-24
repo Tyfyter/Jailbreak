@@ -18,8 +18,9 @@ namespace Jailbreak {
         internal static Jailbreak Instance => instance;
 
 		internal UserInterface UI;
-		//internal UserInterface literalUI;
 		public GlyphItemsUI glyphItemUI;
+		internal UserInterface modularUI;
+		public ModularEditorUI modularUIState;
         public static Texture2D LiteralBackTexture;
 
 		public Jailbreak() {}
@@ -58,6 +59,7 @@ namespace Jailbreak {
             ActionContext.Default = new ActionContext();
 			if (!Main.dedServ){
 				UI = new UserInterface();
+				modularUI = new UserInterface();
                 LiteralBackTexture = GetTexture("UI/Literal_Back");
 			}
         }
@@ -65,7 +67,9 @@ namespace Jailbreak {
             actions = null;
             Actions = null;
             UI = null;
+            modularUI = null;
             glyphItemUI = null;
+            modularUIState = null;
             ActionContext.Default = null;
             LiteralBackTexture = null;
             instance = null;
@@ -129,14 +133,29 @@ namespace Jailbreak {
             return actions[id];
         }
 		public override void UpdateUI(GameTime gameTime) {
-            if(UI.CurrentState!=null&&!Main.playerInventory){
-				UI.SetState(null);
-			}
+            if(!Main.playerInventory) {
+                if(UI.CurrentState!=null){
+				    UI.SetState(null);
+			    }
+                if(modularUI.CurrentState!=null){
+				    modularUI.SetState(null);
+			    }
+            }
 			UI?.Update(gameTime);
+			modularUI?.Update(gameTime);
 		}
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
 			int inventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
 			if (inventoryIndex != -1) {
+                layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer(
+					"Jailbreak: ModularEditUI",
+					delegate {
+						// If the current UIState of the UserInterface is null, nothing will draw. We don't need to track a separate .visible value.
+						modularUI.Draw(Main.spriteBatch, new GameTime());
+						return true;
+					},
+					InterfaceScaleType.UI)
+				);
 				layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer(
 					"Jailbreak: DriveEditUI",
 					delegate {
@@ -148,6 +167,11 @@ namespace Jailbreak {
 				);
 			}
 		}
+        public void OpenModularEditor() {
+            modularUIState = new ModularEditorUI();
+            modularUIState.Activate();
+            modularUI.SetState(modularUIState);
+        }
         public void OpenDriveEditor(DriveItem drive) {
             glyphItemUI = new GlyphItemsUI();
             glyphItemUI.drive = drive;
@@ -156,12 +180,52 @@ namespace Jailbreak {
         }
     }
     public static class JailbreakExt {
+        public delegate ref T getRefDelegate<T>();
         public static bool ToBool(this object value) {
             try {
                 return (long)value!=0;
             } catch(Exception) {
                 return (bool)value;
             }
+        }
+        public class RefWrapper<T> {
+            public T value;
+            public RefWrapper(T v) {
+                value = v;
+            }
+            public static bool operator ==(RefWrapper<T> t, T o) => EqualityComparer<T>.Default.Equals(t.value, o);
+            public static bool operator !=(RefWrapper<T> t, T o) => !EqualityComparer<T>.Default.Equals(t.value, o);
+            public static bool operator ==(T o, RefWrapper<T> t) => EqualityComparer<T>.Default.Equals(t.value, o);
+            public static bool operator !=(T o, RefWrapper<T> t) => !EqualityComparer<T>.Default.Equals(t.value, o);
+            public static bool operator <(RefWrapper<T> t, T o) => Comparer<T>.Default.Compare(t.value, o)<0;
+            public static bool operator >(RefWrapper<T> t, T o) => Comparer<T>.Default.Compare(t.value, o)>0;
+            public static bool operator <(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)<0;
+            public static bool operator >(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)>0;
+            public static bool operator <=(RefWrapper<T> t, T o) => Comparer<T>.Default.Compare(t.value, o)<=0;
+            public static bool operator >=(RefWrapper<T> t, T o) => Comparer<T>.Default.Compare(t.value, o)>=0;
+            public static bool operator <=(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)<=0;
+            public static bool operator >=(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)>=0;
+            public override string ToString() {
+                return "ref "+value.ToString();
+            }
+            /* operator cannot be applied between operands of types 'T' and 'T'
+            public static bool operator <(RefWrapper<T> t, T o) => t.value<o;
+            public static bool operator >(RefWrapper<T> t, T o) => t.value>o;
+            public static bool operator <(T o, RefWrapper<T> t) => o<t.value;
+            public static bool operator >(T o, RefWrapper<T> t) => o>t.value;
+            public static bool operator <=(RefWrapper<T> t, T o) => t.value<=o;
+            public static bool operator >=(RefWrapper<T> t, T o) => t.value>=o;
+            public static bool operator <=(T o, RefWrapper<T> t) => o<=t.value;
+            public static bool operator >=(T o, RefWrapper<T> t) => o>=t.value;
+            public static bool operator ==(RefWrapper<T> t, RefWrapper<T> o) => t.value==o.value;
+            public static bool operator !=(RefWrapper<T> t, RefWrapper<T> o) => t.value!=o.value;//*/
+            /*public static bool operator <=(RefWrapper<T> t, T o) {
+                return t<=o;
+            }
+            public static bool operator >=(RefWrapper<T> t, T o) {
+                return t>=o;
+            }*/
+            public static implicit operator RefWrapper<T>(T v) => new RefWrapper<T>(v);
         }
     }
     public enum ActionType {

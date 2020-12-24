@@ -108,7 +108,7 @@ namespace Jailbreak.Items{
         public override float cost => 0;
         public override float delay => 0;
         public override object Execute(int i){
-            Main.NewText(parameters[0].ToString());
+            Main.NewText(parameters[0] is null?"null":parameters[0].ToString());
             return null;
         }
     }
