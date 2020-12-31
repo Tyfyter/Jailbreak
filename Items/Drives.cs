@@ -17,6 +17,10 @@ namespace Jailbreak.Items {
         }
         public bool Readonly => false;
         public int maxSize => 0;
+        public override void SetStaticDefaults() {
+            base.SetStaticDefaults();
+            Sets.Item.drive[item.type] = true;
+        }
         public override TagCompound Save() {
             try {
                 return new TagCompound() {

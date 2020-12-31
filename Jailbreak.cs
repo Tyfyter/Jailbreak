@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -63,6 +64,16 @@ namespace Jailbreak {
 				modularUI = new UserInterface();
                 LiteralBackTexture = GetTexture("UI/Literal_Back");
 			}
+            Sets.Item.casing = new bool[0];
+            Sets.Item.drive = new bool[0];
+            Sets.Item.lens = ItemID.Sets.Factory.CreateBoolSet(ItemID.Lens,ItemID.Sapphire,ItemID.Ruby,ItemID.MechanicalLens,ItemID.EyeoftheGolem);
+            Sets.Item.battery = ItemID.Sets.Factory.CreateBoolSet(ItemID.StarinaBottle,ItemID.ShadowOrb,ItemID.CrimsonHeart,ItemID.LihzahrdPowerCell,ItemID.MechanicalBatteryPiece);
+            NonFishItem.ResizeArrays+=()=>{
+                Array.Resize(ref Sets.Item.casing, Item.staff.Length);
+                Array.Resize(ref Sets.Item.drive, Item.staff.Length);
+                Array.Resize(ref Sets.Item.lens, Item.staff.Length);
+                Array.Resize(ref Sets.Item.battery, Item.staff.Length);
+            };
         }
         public override void Unload() {
             actions = null;
@@ -73,6 +84,10 @@ namespace Jailbreak {
             modularUIState = null;
             ActionContext.Default = null;
             LiteralBackTexture = null;
+            Sets.Item.casing = null;
+            Sets.Item.drive = null;
+            Sets.Item.lens = null;
+            Sets.Item.battery = null;
             instance = null;
         }
         public override void PostUpdateInput() {
@@ -183,6 +198,14 @@ namespace Jailbreak {
             UI.SetState(glyphItemUI);
         }
     }
+    public static class Sets {
+        public static class Item {
+            public static bool[] casing;
+            public static bool[] drive;
+            public static bool[] lens;
+            public static bool[] battery;
+        }
+    }
     public static class JailbreakExt {
         public delegate ref T getRefDelegate<T>();
         public static bool ToBool(this object value) {
@@ -261,6 +284,15 @@ namespace Jailbreak {
             public static bool operator >=(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)>=0;
             public override string ToString() => "ref "+value.ToString();
             public static implicit operator RefWrapper<T>(T v) => new RefWrapper<T>(v);
+        }
+    }
+    public sealed class NonFishItem : ModItem {
+        public override string Texture => "Terraria/Item_2290";
+        public static event Action ResizeArrays;
+        public override bool IsQuestFish() {
+            ResizeArrays();
+            ResizeArrays = null;
+            return false;
         }
     }
     public enum ActionType {
