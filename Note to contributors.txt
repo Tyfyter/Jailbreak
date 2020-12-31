@@ -1,4 +1,6 @@
-All Action/Operation/Control/Literal sprite are placeholders
+All sprites are placeholders
 
 As for my naming conventions:
 https://xkcd.com/163/
+
+In conclusion,if you intend to contribute sprites, please do, but if you intend to contribute code you may want to keep the number of a mental help hotline on hand.

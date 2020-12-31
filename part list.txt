@@ -1,0 +1,36 @@
+casings:
+silver/tungsten
+meteorite
+hellstone
+hallowed
+nanites+adamantite/titanium
+spectre/shroomite/solar tablet fragment
+luminite
+
+drives:
+stone slab
+demonite/crimtane
+cobalt/palladium
+chlorophyte
+luminite
+
+lenses:
+lens
+sapphire
+ruby (triggered)
+mechanical lens (damaging)
+light
+might (triggered)
+fright (damaging)
+sight (repeating, damaging)
+eye of the golem (damaging)
+
+batteries:
+star in a bottle
+shadow orb
+crimson heart
+sunplate
+crystal shard: "resonating crystal"
+mech
+cog: "clockwork battery"
+lihzahrd

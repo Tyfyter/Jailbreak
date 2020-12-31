@@ -16,6 +16,7 @@ namespace Jailbreak.Items {
             set => actions = value;
         }
         public bool Readonly => false;
+        public int maxSize => 0;
         public override TagCompound Save() {
             try {
                 return new TagCompound() {

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -113,6 +114,8 @@ namespace Jailbreak {
             //alias = alias.Replace("Vector3","Vec3");
             alias = alias.Replace("PushParameter","Push");
             alias = alias.Replace("PopParameter","Pop");
+            alias = alias.Replace("RemoveParameter","Pop");
+            alias = alias.Replace("Remove","Pop");
             alias = alias.Replace("JumpIf","Jump");
             return alias;
         }
@@ -175,6 +178,7 @@ namespace Jailbreak {
         public void OpenDriveEditor(DriveItem drive) {
             glyphItemUI = new GlyphItemsUI();
             glyphItemUI.drive = drive;
+            glyphItemUI.maxSize = drive.maxSize;
             glyphItemUI.Activate();
             UI.SetState(glyphItemUI);
         }
@@ -188,11 +192,61 @@ namespace Jailbreak {
                 return (bool)value;
             }
         }
+        #region spritebatch extensions
+        static SpriteSortMode sortMode;
+        static BlendState blendState;
+        static SamplerState samplerState;
+        static DepthStencilState depthStencilState;
+        static RasterizerState rasterizerState;
+        static Effect effect;
+        static Matrix transformMatrix;
+        public static void Pause(this SpriteBatch spriteBatch) {
+            try {
+                if(_sortMode is null) {
+                    _sortMode = typeof(SpriteBatch).GetField("spriteSortMode", BindingFlags.NonPublic|BindingFlags.Instance);
+                    _blendState = typeof(SpriteBatch).GetField("blendState", BindingFlags.NonPublic|BindingFlags.Instance);
+                    _samplerState = typeof(SpriteBatch).GetField("samplerState", BindingFlags.NonPublic|BindingFlags.Instance);
+                    _depthStencilState = typeof(SpriteBatch).GetField("depthStencilState", BindingFlags.NonPublic|BindingFlags.Instance);
+                    _rasterizerState = typeof(SpriteBatch).GetField("rasterizerState", BindingFlags.NonPublic|BindingFlags.Instance);
+                    _effect = typeof(SpriteBatch).GetField("customEffect", BindingFlags.NonPublic|BindingFlags.Instance);
+                    _transformMatrix = typeof(SpriteBatch).GetField("transformMatrix", BindingFlags.NonPublic|BindingFlags.Instance);
+                }
+                sortMode = (SpriteSortMode)_sortMode.GetValue(spriteBatch);
+                blendState = (BlendState)_blendState.GetValue(spriteBatch);
+                samplerState = (SamplerState)_samplerState.GetValue(spriteBatch);
+                depthStencilState = (DepthStencilState)_depthStencilState.GetValue(spriteBatch);
+                rasterizerState = (RasterizerState)_rasterizerState.GetValue(spriteBatch);
+                effect = (Effect)_effect.GetValue(spriteBatch);
+                transformMatrix = (Matrix)_transformMatrix.GetValue(spriteBatch);
+                spriteBatch.End();
+            } catch(InvalidOperationException e) {
+			    throw new InvalidOperationException("called pause without spritebatch drawing", e);
+            } catch(Exception e) {
+			    throw new Exception("error while pausing spritebatch", e);
+            }
+        }
+        public static void Resume(this SpriteBatch spriteBatch) {
+            try {
+                spriteBatch.Begin(sortMode, blendState, samplerState, depthStencilState, rasterizerState, effect, transformMatrix);
+            } catch(InvalidOperationException e) {
+			    throw new InvalidOperationException("called resume with spritebatch drawing", e);
+            } catch(Exception e) {
+			    throw new Exception("error while resuming spritebatch", e);
+            }
+        }
+        private static FieldInfo _sortMode;
+        private static FieldInfo _blendState;
+        private static FieldInfo _samplerState;
+        private static FieldInfo _depthStencilState;
+        private static FieldInfo _rasterizerState;
+        private static FieldInfo _effect;
+        private static FieldInfo _transformMatrix;
+        #endregion
         public class RefWrapper<T> {
             public T value;
-            public RefWrapper(T v) {
-                value = v;
-            }
+            public RefWrapper(T v) => value = v;
+            public override int GetHashCode() => value.GetHashCode();
+            public override bool Equals(object o) => EqualityComparer<T>.Equals(value, o);
             public static bool operator ==(RefWrapper<T> t, T o) => EqualityComparer<T>.Default.Equals(t.value, o);
             public static bool operator !=(RefWrapper<T> t, T o) => !EqualityComparer<T>.Default.Equals(t.value, o);
             public static bool operator ==(T o, RefWrapper<T> t) => EqualityComparer<T>.Default.Equals(t.value, o);
@@ -205,26 +259,7 @@ namespace Jailbreak {
             public static bool operator >=(RefWrapper<T> t, T o) => Comparer<T>.Default.Compare(t.value, o)>=0;
             public static bool operator <=(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)<=0;
             public static bool operator >=(T o, RefWrapper<T> t) => Comparer<T>.Default.Compare(o, t.value)>=0;
-            public override string ToString() {
-                return "ref "+value.ToString();
-            }
-            /* operator cannot be applied between operands of types 'T' and 'T'
-            public static bool operator <(RefWrapper<T> t, T o) => t.value<o;
-            public static bool operator >(RefWrapper<T> t, T o) => t.value>o;
-            public static bool operator <(T o, RefWrapper<T> t) => o<t.value;
-            public static bool operator >(T o, RefWrapper<T> t) => o>t.value;
-            public static bool operator <=(RefWrapper<T> t, T o) => t.value<=o;
-            public static bool operator >=(RefWrapper<T> t, T o) => t.value>=o;
-            public static bool operator <=(T o, RefWrapper<T> t) => o<=t.value;
-            public static bool operator >=(T o, RefWrapper<T> t) => o>=t.value;
-            public static bool operator ==(RefWrapper<T> t, RefWrapper<T> o) => t.value==o.value;
-            public static bool operator !=(RefWrapper<T> t, RefWrapper<T> o) => t.value!=o.value;//*/
-            /*public static bool operator <=(RefWrapper<T> t, T o) {
-                return t<=o;
-            }
-            public static bool operator >=(RefWrapper<T> t, T o) {
-                return t>=o;
-            }*/
+            public override string ToString() => "ref "+value.ToString();
             public static implicit operator RefWrapper<T>(T v) => new RefWrapper<T>(v);
         }
     }

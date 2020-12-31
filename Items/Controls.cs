@@ -32,6 +32,7 @@ namespace Jailbreak.Items {
         }
     }
     public class SleepControl : ActionItem {
+        public override float cost => delay>0?0:delay*-0.25f;
         public override float delay => time??(float)parameters[0];
         public float? time;
         public override TagCompound Save() {

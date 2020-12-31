@@ -49,10 +49,27 @@ namespace Jailbreak.Projectiles {
                     item = actions[context.Cursor++];
                     item.context = context;
                     if(item.cost<=(charge?.value??100)) {
-                        if(!(charge is null)) charge.value-=item.cost;
+                        float cost = item.cost;
+                        if(!(charge is null)) {
+                            switch(context.costMult) {
+                                case -1:
+                                if(context.Caster is Player player) player.statMana-=(int)Math.Ceiling(cost*player.manaCost);
+                                break;
+                                default:
+                                charge.value-=cost;
+                                break;
+                            }
+                        }
                         float delay = item.delay;
                         if(!(item is SleepControl)) {//if anyone has a reason why this should be a property instead of being uniqe to SleepControl, please tell me
-                            delay*=context.delayMult;
+                            switch(context.delayMult) {
+                                case -1:
+                                delay = 1;
+                                break;
+                                default:
+                                delay*=context.delayMult;
+                                break;
+                            }
                         }
                         context.Delay+=delay;
                         ret = item.Execute(glyphType);

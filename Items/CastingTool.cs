@@ -41,11 +41,7 @@ namespace Jailbreak.Items {
         public PowerCellItem powerCell => powerCellItem.Value.modItem as PowerCellItem;
         public override List<ActionItem> Actions => drive.Actions;
         public override RefWrapper<float> getCharge => (powerCell is null)?powerCellItem.Value.GetGlobalItem<PowerCellGlobalItem>().charge:powerCell.charge;
-        public float maxCharge {
-            get {
-                return PowerCellGlobalItem.maxCharge(powerCellItem.Value);
-            }
-        }
+        public float maxCharge => PowerCellGlobalItem.maxCharge(powerCellItem.Value);
         public float recharge {
             get {
                 if(!(powerCell is null))return powerCell.maxCharge;
@@ -87,6 +83,7 @@ namespace Jailbreak.Items {
         }
         public override void UpdateInventory(Player player) {
             try {
+                if(powerCellItem.Value is Item i)i.owner = item.owner;
                 if(getCharge<maxCharge) {
                     getCharge.value = Math.Min(getCharge.value+recharge, maxCharge);
                     if(getCharge>=maxCharge) {

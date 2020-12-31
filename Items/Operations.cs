@@ -217,7 +217,6 @@ namespace Jailbreak.Items {
         }
     }
     public class GetListSizeOperation : ActionItem {
-        public override bool hasLiteral => true;
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0.25f;
         public override object Execute(int i){
@@ -228,25 +227,61 @@ namespace Jailbreak.Items {
     /// see also <seealso cref="PopParameterOperation"/>
     /// </summary>
     public class PushParameterOperation : ActionItem {
+        public override bool hasLiteral => true;
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0f;
+        public int index = 0;
         public override object Execute(int i){
-            parameters.Insert(0,context.lastReturn);
+            parameters.Insert(index,context.lastReturn);
             mod.Logger.Info($"pushed, parameters now [{string.Join(", ", parameters)}]");
             return null;
+        }
+        public override TagCompound Save() {
+            TagCompound o = new TagCompound {
+                { "index", index }
+            };
+            return o;
+        }
+        public override void Load(TagCompound tag) {
+            index = tag.Get<int>("index");
+        }
+        protected internal override ActionItem ApplyLiteral(string literal) {
+            if(int.TryParse(literal, out int i))index = i;
+            return this;
+        }
+        protected internal override string GetLiteral() {
+            return index+"";
         }
     }
     /// <summary>
     /// see also <seealso cref="PushParameterOperation"/>
     /// </summary>
     public class PopParameterOperation : ActionItem {
+        public override bool hasLiteral => true;
         public override ActionType Type => ActionType.Operation;
         public override float cost => 0f;
+        public int index = 0;
         public override object Execute(int i){
-            object o = parameters[0];
-            parameters.RemoveAt(0);
+            //object o = parameters[0];
+            parameters.RemoveAt(index);
             mod.Logger.Info($"popped, parameters now [{string.Join(", ", parameters)}]");
+            return null;//o;
+        }
+        public override TagCompound Save() {
+            TagCompound o = new TagCompound {
+                { "index", index }
+            };
             return o;
+        }
+        public override void Load(TagCompound tag) {
+            index = tag.Get<int>("index");
+        }
+        protected internal override ActionItem ApplyLiteral(string literal) {
+            if(int.TryParse(literal, out int i))index = i;
+            return this;
+        }
+        protected internal override string GetLiteral() {
+            return index+"";
         }
     }
 }

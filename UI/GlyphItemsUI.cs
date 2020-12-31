@@ -14,6 +14,10 @@ using System.Linq;
 
 namespace Jailbreak.UI {
 	public class GlyphItemsUI : UIState {
+        /// <summary>
+        /// values below 1 are special: 0:infinite
+        /// </summary>
+        protected internal int maxSize = 0;
         public List<GlyphItemSlot> itemSlots = new List<GlyphItemSlot>(){};
         public DriveItem drive;
         protected internal bool driveDirty = false;
@@ -25,6 +29,9 @@ namespace Jailbreak.UI {
             if(drive!=null){
                 if(drive.Actions == null)drive.Actions = new List<ActionItem>() { };
                 l+=drive.Actions.Count;
+            }
+            if(maxSize>0&&l>maxSize) {
+                l = maxSize;
             }
             Main.UIScaleMatrix.Decompose(out Vector3 scale, out Quaternion ignore, out Vector3 ignore2);
             ActionItem current;
