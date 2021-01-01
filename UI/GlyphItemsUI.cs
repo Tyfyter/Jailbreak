@@ -52,7 +52,7 @@ namespace Jailbreak.UI {
                 }
                 if(drive!=null){
                     if(current!=null){
-                        itemSlots[i].Item = current?.item??Jailbreak.CreateNew(current).item;
+                        itemSlots[i].item = current?.item??Jailbreak.CreateNew(current).item;
                     }
                 }
                 Append(itemSlots[i]);
@@ -115,12 +115,12 @@ namespace Jailbreak.UI {
                 drive.Actions.Clear();
                 ActionItem item;
                 for(int i = 0; i < itemSlots.Count; i++) {
-                    item = itemSlots[i].Item.modItem as ActionItem;
+                    item = itemSlots[i].item.modItem as ActionItem;
                     if(item!=null) {
                         drive.Actions.Add(item);
                     }
                 }
-                if((itemSlots.Count>0&&!itemSlots[itemSlots.Count-1].Item.IsAir)||(itemSlots.Count>1&&itemSlots[itemSlots.Count-2].Item.IsAir)) {
+                if((itemSlots.Count>0&&!itemSlots[itemSlots.Count-1].item.IsAir)||(itemSlots.Count>1&&itemSlots[itemSlots.Count-2].item.IsAir)) {
                     ResizeSlotList();
                 }
             }

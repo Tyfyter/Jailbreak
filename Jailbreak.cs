@@ -23,6 +23,7 @@ namespace Jailbreak {
 		public GlyphItemsUI glyphItemUI;
 		internal UserInterface modularUI;
 		public ModularEditorUI modularUIState;
+		public AssemblerUI assemblerUIState;
         public static Texture2D LiteralBackTexture;
 
 		public Jailbreak() {}
@@ -186,9 +187,22 @@ namespace Jailbreak {
 			}
 		}
         public void OpenModularEditor() {
+            if(!(assemblerUIState is null)){
+                assemblerUIState.Deactivate();
+                assemblerUIState = null;
+			}
             modularUIState = new ModularEditorUI();
             modularUIState.Activate();
             modularUI.SetState(modularUIState);
+        }
+        public void OpenAssemblerUI() {
+            if(!(modularUIState is null)){
+                modularUIState.Deactivate();
+                modularUIState = null;
+			}
+            assemblerUIState = new AssemblerUI();
+            assemblerUIState.Activate();
+            modularUI.SetState(assemblerUIState);
         }
         public void OpenDriveEditor(DriveItem drive) {
             glyphItemUI = new GlyphItemsUI();

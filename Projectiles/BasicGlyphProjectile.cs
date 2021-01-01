@@ -29,7 +29,7 @@ namespace Jailbreak.Projectiles {
             int cycleCount = 0;
             object ret;
             if((glyphType&GlyphProjectileType.Tracer)!=0) {
-                Dust.NewDustPerfect(projectile.Center, 267, new Vector2(projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f), 100, new Color(0,90,255), 0.75f).noGravity = true;
+                Dust.NewDustPerfect(projectile.Center, 267, new Vector2(projectile.velocity.X * 0.2f, projectile.velocity.Y * 0.2f), 100, context.color, 0.75f).noGravity = true;
             }
             RefWrapper<float> charge = context.charge;
             if(context.costMult==-1&&context.Caster is Player player) {
@@ -52,6 +52,9 @@ namespace Jailbreak.Projectiles {
                     item = actions[context.Cursor++];
                     item.context = context;
                     float cost = item.cost;
+                    if(context.costMult>0) {
+                        cost*=context.costMult;
+                    }
                     if(cost<=(charge?.value??100)) {
                         if(!(charge is null)) {
                             ConsumeCharge(cost);

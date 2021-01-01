@@ -16,29 +16,31 @@ namespace Jailbreak.UI
 	// See ExamplePersonUI for usage and use the Awesomify chat option of Example Person to see in action.
 	public class GlyphItemSlot : UIElement
 	{
-		internal Item Item;
+		internal Item item;
 		internal readonly int _context;
 		internal readonly int color;
 		private readonly float _scale;
 		internal Func<Item, bool> ValidItemFunc;
         protected internal int index = -1;
-		public GlyphItemSlot(int colorContext = ItemSlot.Context.CraftingMaterial, int context = ItemSlot.Context.InventoryItem, float scale = 1f, Item item = null) {
+		public GlyphItemSlot(int colorContext = ItemSlot.Context.CraftingMaterial, int context = ItemSlot.Context.InventoryItem, float scale = 1f, Item _item = null) {
 			color = colorContext;
             _context = context;
 			_scale = scale;
-			if(item == null){
-				Item = new Item();
-				Item.SetDefaults(0);
-			}else if(item.IsAir){
-				Item = new Item();
-				Item.SetDefaults(0);
-			}else{
-				Item = item;
-			}
-
+            SetItem(_item);
 			Width.Set(Main.inventoryBack9Texture.Width * scale, 0f);
 			Height.Set(Main.inventoryBack9Texture.Height * scale, 0f);
 		}
+        public void SetItem(Item _item) {
+			if(_item == null){
+				item = new Item();
+				item.SetDefaults(0);
+			}else if(_item.IsAir){
+				item = new Item();
+				item.SetDefaults(0);
+			}else{
+				item = _item;
+			}
+        }
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			float oldScale = Main.inventoryScale;
 			Main.inventoryScale = _scale;
@@ -49,10 +51,10 @@ namespace Jailbreak.UI
 				if (ValidItemFunc == null || ValidItemFunc(Main.mouseItem)) {
                     // Handle handles all the click and hover actions based on the context.
                     ActionItem item = null;
-                    if(Item?.modItem is ActionItem action) item = action;
-					ItemSlot.Handle(ref Item, _context);
+                    if(this.item?.modItem is ActionItem action) item = action;
+                    ItemSlot.Handle(ref this.item, _context);
                     ActionItem item2 = null;
-                    if(Item?.modItem is ActionItem action2) item2 = action2;
+                    if(this.item?.modItem is ActionItem action2) item2 = action2;
                     GlyphItemsUI parent = ((GlyphItemsUI)Parent);
                     if(item!=item2) {
                         parent.driveDirty = true;
@@ -68,7 +70,7 @@ namespace Jailbreak.UI
 				}
 			}
 			// Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
-			ItemSlot.Draw(spriteBatch, ref Item, color, rectangle.TopLeft());
+			ItemSlot.Draw(spriteBatch, ref item, color, rectangle.TopLeft());
 			Main.inventoryScale = oldScale;
 		}
 	}
@@ -88,6 +90,17 @@ namespace Jailbreak.UI
 			Width.Set(Main.inventoryBack9Texture.Width * scale, 0f);
 			Height.Set(Main.inventoryBack9Texture.Height * scale, 0f);
 		}
+        /*public void SetItem(Item _item) {
+			if(_item == null){
+				item = new Item();
+				item.SetDefaults(0);
+			}else if(_item.IsAir){
+				item = new Item();
+				item.SetDefaults(0);
+			}else{
+				item = _item;
+			}
+        }*/
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			float oldScale = Main.inventoryScale;
 			Main.inventoryScale = _scale;
@@ -102,6 +115,66 @@ namespace Jailbreak.UI
 			// Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
 			ItemSlot.Draw(spriteBatch, ref item.Value, color, rectangle.TopLeft());
 			Main.inventoryScale = oldScale;
+		}
+	}
+    public class CraftingItemSlot : UIElement{
+		internal Item item;
+		internal readonly int _context;
+		internal readonly int color;
+		private readonly float _scale;
+		internal Func<Item, bool> ValidItemFunc;
+        /// <summary>
+        /// Called whenever the slot's contents are changed, param 1 is the new item, param 2 is the old item
+        /// </summary>
+		internal Action<Item, Item> ContentsChangedAction;
+		internal Func<bool> DoDraw;
+        protected internal int index = -1;
+		public CraftingItemSlot(int colorContext = ItemSlot.Context.CraftingMaterial, int context = ItemSlot.Context.InventoryItem, float scale = 1f, Item _item = null) {
+			color = colorContext;
+            _context = context;
+			_scale = scale;
+            SetItem(_item);
+			Width.Set(Main.inventoryBack9Texture.Width * scale, 0f);
+			Height.Set(Main.inventoryBack9Texture.Height * scale, 0f);
+		}
+        public void SetItem(Item _item) {
+			if(_item == null){
+				item = new Item();
+				item.SetDefaults(0);
+			}else if(_item.IsAir){
+				item = new Item();
+				item.SetDefaults(0);
+			}else{
+				item = _item;
+			}
+        }
+		protected override void DrawSelf(SpriteBatch spriteBatch) {
+			float oldScale = Main.inventoryScale;
+			Main.inventoryScale = _scale;
+			Rectangle rectangle = GetDimensions().ToRectangle();
+
+			if (ContainsPoint(Main.MouseScreen) && !PlayerInput.IgnoreMouseInterface) {
+				Main.LocalPlayer.mouseInterface = true;
+				if (ValidItemFunc == null || ValidItemFunc(Main.mouseItem)) {
+                    Item item2 = item;
+                    ItemSlot.Handle(ref item, _context);
+                    if(item!=item2) {
+                        ContentsChangedAction(item2, item);
+                    }
+				}
+			}
+            // Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
+            bool drawSlot = true;
+            if(!(DoDraw is null))drawSlot = DoDraw();
+            if(drawSlot) {
+                ItemSlot.Draw(spriteBatch, ref item, color, rectangle.TopLeft());
+            }else{
+                Item _item = new Item();
+                _item.TurnToAir();
+                ItemSlot.Draw(spriteBatch, ref _item, color, rectangle.TopLeft());
+            }
+
+            Main.inventoryScale = oldScale;
 		}
 	}
 }

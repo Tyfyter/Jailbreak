@@ -12,12 +12,13 @@ using static Jailbreak.JailbreakExt;
 namespace Jailbreak.Items {
     public abstract class PowerCellItem : ModItem {
         public RefWrapper<float> charge = 120;
-        public float maxCharge = 120;
+        public float maxCharge => 120;
         public float recharge = 1;
         public override void SetStaticDefaults() {
             base.SetStaticDefaults();
             Sets.Item.battery[item.type] = true;
         }
+        public virtual void getStats(Item castingTool, ref float damage) {}
     }
     public class PowerCellGlobalItem : GlobalItem {
         public override bool InstancePerEntity => true;

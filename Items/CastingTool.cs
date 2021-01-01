@@ -18,6 +18,8 @@ namespace Jailbreak.Items {
         protected List<ActionItem> actions;
         public virtual List<ActionItem> Actions => actions;
         public virtual RefWrapper<float> getCharge => null;
+        public virtual float maxCharge => 100;
+        public virtual float chargeRate => PowerCellGlobalItem.DefaultRecharge;
         protected byte projFields = GlyphProjectileType.Normal;
         public virtual byte ProjFields => projFields;
         public override void SetDefaults() {
@@ -33,6 +35,16 @@ namespace Jailbreak.Items {
             lastProj = projectile.projectile.whoAmI;
             return false;
         }
+        public void Recharge(){
+            if(getCharge<maxCharge) {
+                getCharge.value = Math.Min(getCharge.value+chargeRate, maxCharge);
+                if(getCharge>=maxCharge) {
+                    Main.NewText("fully charged");
+                }
+            }else if(getCharge>maxCharge) {
+                getCharge.value = maxCharge;
+            }
+        }
     }
     public class ModularCastingTool : CastingTool {
         public Ref<Item> driveItem;
@@ -41,8 +53,8 @@ namespace Jailbreak.Items {
         public PowerCellItem powerCell => powerCellItem.Value.modItem as PowerCellItem;
         public override List<ActionItem> Actions => drive.Actions;
         public override RefWrapper<float> getCharge => (powerCell is null)?powerCellItem.Value.GetGlobalItem<PowerCellGlobalItem>().charge:powerCell.charge;
-        public float maxCharge => PowerCellGlobalItem.maxCharge(powerCellItem.Value);
-        public float recharge {
+        public override float maxCharge => PowerCellGlobalItem.maxCharge(powerCellItem.Value);
+        public override float chargeRate {
             get {
                 if(!(powerCell is null))return powerCell.maxCharge;
                 switch(powerCellItem.Value.type) {
@@ -51,7 +63,6 @@ namespace Jailbreak.Items {
                     default:
                     return PowerCellGlobalItem.DefaultRecharge;
                 }
-                return 0;
             }
         }
         public override byte ProjFields => Normal;
@@ -84,12 +95,7 @@ namespace Jailbreak.Items {
         public override void UpdateInventory(Player player) {
             try {
                 if(powerCellItem.Value is Item i)i.owner = item.owner;
-                if(getCharge<maxCharge) {
-                    getCharge.value = Math.Min(getCharge.value+recharge, maxCharge);
-                    if(getCharge>=maxCharge) {
-                        Main.NewText("fully charged");
-                    }
-                }
+                Recharge();
             } catch(NullReferenceException) {
                 if(driveItem is null) {
                     driveItem = new Ref<Item>(new Item());
@@ -164,13 +170,12 @@ namespace Jailbreak.Items {
         public Item powerCellItem;
         public PowerCellItem powerCell => powerCellItem.modItem as PowerCellItem;
         public Item casingItem;
-        public PowerCellItem casing => casingItem.modItem as PowerCellItem;
+        public CasingItem casing => casingItem.modItem as CasingItem;
         public Item lensItem;
-        public PowerCellItem lense => lensItem.modItem as PowerCellItem;
         public override List<ActionItem> Actions => drive.Actions;
         public override RefWrapper<float> getCharge => (powerCell is null)?powerCellItem.GetGlobalItem<PowerCellGlobalItem>().charge:powerCell.charge;
-        public float maxCharge => PowerCellGlobalItem.maxCharge(powerCellItem);
-        public float recharge {
+        public override float maxCharge => PowerCellGlobalItem.maxCharge(powerCellItem);
+        public override float chargeRate {
             get {
                 if(!(powerCell is null))return powerCell.maxCharge;
                 switch(powerCellItem.type) {
@@ -182,10 +187,12 @@ namespace Jailbreak.Items {
                 return 0;
             }
         }
-        public override byte ProjFields => Normal;
+        public override byte ProjFields => LensGlobalItem.projType(lensItem);
+        public override void SetStaticDefaults() {
+            Tooltip.SetDefault("ModifyTooltips please add details");
+        }
         public override void SetDefaults() {
             base.SetDefaults();
-            item.damage = 30;
             if(driveItem is null) {
                 driveItem = new Ref<Item>(new Item());
                 driveItem.Value.SetDefaults(0);
@@ -193,6 +200,18 @@ namespace Jailbreak.Items {
             if(powerCellItem is null) {
                 powerCellItem = new Item();
                 powerCellItem.SetDefaults(0);
+            }
+            if(lensItem is null) {
+                lensItem = new Item();
+                lensItem.SetDefaults(0);
+            }
+            int dmg = item.damage;
+            float damage = 1f;
+            if(!(casing is null))casing.getStats(item, ref damage);
+            if(!(powerCell is null))powerCell.getStats(item, ref damage);
+            LensGlobalItem.getStats(lensItem, item, ref damage, ref item.shootSpeed);
+            if(item.damage==dmg) {
+                item.damage = (int)damage;
             }
         }
         public override bool AltFunctionUse(Player player) {
@@ -208,15 +227,18 @@ namespace Jailbreak.Items {
         public override bool ConsumeItem(Player player) {
             return false;
         }
+        public override void ModifyTooltips(List<TooltipLine> tooltips) {
+            foreach(TooltipLine line in tooltips) {
+                if(line.Name.Equals("Tooltip")||line.Name.Equals("Tooltip1")) {
+                    line.text = $"\ncasing: {casingItem}\npower cell: {powerCellItem}\nlens: {lensItem}\ndrive: {driveItem}";
+                    break;
+                }
+            }
+        }
         public override void UpdateInventory(Player player) {
             try {
                 if(powerCellItem is Item i)i.owner = item.owner;
-                if(getCharge<maxCharge) {
-                    getCharge.value = Math.Min(getCharge.value+recharge, maxCharge);
-                    if(getCharge>=maxCharge) {
-                        Main.NewText("fully charged");
-                    }
-                }
+                Recharge();
             } catch(NullReferenceException) {
                 if(driveItem is null) {
                     driveItem = new Ref<Item>(new Item());
@@ -267,8 +289,14 @@ namespace Jailbreak.Items {
                 charge.value = 0;
             }
             base.Shoot(player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack);
-            ((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.charge = projCharge;
-            ((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.Caster = player;
+            ActionContext context = ((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context;
+            context.charge = projCharge;
+            context.Caster = player;
+            context.color = LensGlobalItem.getColor(lensItem);
+
+            //((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.charge = projCharge;
+            //((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.Caster = player;
+            //((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.color = LensGlobalItem.getColor(lensItem);
             return false;
         }
     }

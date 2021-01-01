@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,7 @@ namespace Jailbreak {
         public float delayMult = 1f;
         public float costMult = 1f;
         public RefWrapper<float> charge;//getRefDelegate<float> charge;
+        public Color color = new Color(0,90,255);
         public ActionContext() {
             parameters = new List<object>(){new object(),new object(),new object(),new object(),new object()};
         }

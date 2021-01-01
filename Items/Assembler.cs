@@ -44,7 +44,7 @@ namespace Jailbreak.Items {
             if(frameX == 0 && frameY == 0)Item.NewItem(new Vector2(i,j)*16, ModContent.ItemType<Assembler>());
         }
         public override bool NewRightClick(int i, int j) {
-
+            Jailbreak.instance.OpenAssemblerUI();
             return false;
         }
     }
