@@ -27,56 +27,69 @@ namespace Jailbreak.UI {
             casingSlot = AddCraftingSlot(null,
                 basePosition+slotOffset*new Vector2(1,2),
                 false,
-                (i)=>i.modItem is CasingItem,
-                slotScale:1f
+                (i)=>(i.modItem is CasingItem||i.IsAir)&&i.type!=casingSlot.item.type,
+                slotScale:0.75f
                 );
             batterySlot = AddCraftingSlot(null,
                 basePosition+slotOffset*new Vector2(0,2),
                 false,
-                (i)=>Sets.Item.battery[i.type],
-                slotScale:1f
+                (i)=>(Sets.Item.battery[i.type]||i.IsAir)&&i.type!=batterySlot.item.type,
+                slotScale:0.75f
                 );
             lensSlot = AddCraftingSlot(null,
                 basePosition+slotOffset*new Vector2(2,2),
                 false,
-                (i)=>Sets.Item.lens[i.type],
-                slotScale:1f
+                (i)=>(Sets.Item.lens[i.type]||i.IsAir)&&i.type!=lensSlot.item.type,
+                slotScale:0.75f
                 );
 
             outputItem = new Item();
             outputItem.SetDefaults(ModContent.ItemType<CustomCastingTool>());
+            outputItem.owner = Main.myPlayer;
             outputSlot = AddCraftingSlot(outputItem,
                 basePosition+slotOffset*new Vector2(1,0),
                 false,
                 (i)=>i.IsAir&&CanCraft(),
-                slotScale:1f
+                slotScale:0.75f
                 );
             outputSlot.DoDraw = CanCraft;
             outputSlot.ContentsChangedAction = (newItem, oldItem) => {
                 if(newItem.IsAir) {
+                    //oldItem.modItem.SetDefaults();
                     outputItem = new Item();
                     outputItem.SetDefaults(ModContent.ItemType<CustomCastingTool>());
-                    casingSlot.SetItem(null);
-                    batterySlot.SetItem(null);
-                    lensSlot.SetItem(null);
+                    outputItem.owner = Main.myPlayer;
+                    casingSlot.DecrementStack();
+                    batterySlot.DecrementStack();
+                    lensSlot.DecrementStack();
+                    if(((CustomCastingTool)outputItem.modItem).driveItem is null) {
+                        ((CustomCastingTool)outputItem.modItem).driveItem = new Ref<Item>(new Item());
+                        ((CustomCastingTool)outputItem.modItem).driveItem.Value.SetDefaults(0);
+                    }
+                    driveSlot.item = ((CustomCastingTool)outputItem.modItem).driveItem;
                 }
             };
-            CustomCastingTool castingTool = ((CustomCastingTool)outputItem.modItem);
+            CustomCastingTool castingTool = (CustomCastingTool)outputItem.modItem;
             casingSlot.ContentsChangedAction = (newItem, oldItem)=>{
                 castingTool.casingItem = newItem;
+                castingTool.SetDefaults();
             };
             batterySlot.ContentsChangedAction = (newItem, oldItem)=>{
                 castingTool.powerCellItem = newItem;
+                castingTool.SetDefaults();
             };
             lensSlot.ContentsChangedAction = (newItem, oldItem)=>{
                 castingTool.lensItem = newItem;
+                castingTool.SetDefaults();
             };
             if(castingTool.driveItem is null) {
                 castingTool.driveItem = new Ref<Item>(new Item());
                 castingTool.driveItem.Value.SetDefaults(0);
             }
-            driveSlot = new RefItemSlot(_item:castingTool.driveItem, scale:scale.X) {
-                    ValidItemFunc = (i)=>i.modItem is DriveItem,
+            driveSlot = new RefItemSlot(_item:castingTool.driveItem, scale:0.75f) {
+                    ValidItemFunc = (i)=>(i.modItem is DriveItem||i.IsAir)&&i.type!=driveSlot.item.Value.type,
+                    Left = { Pixels = basePosition.X+slotOffset.X },
+                    Top = { Pixels = basePosition.Y+slotOffset.X*3 }
             };
             Append(driveSlot);
         }
@@ -93,6 +106,12 @@ namespace Jailbreak.UI {
             }
             Append(itemSlot);
             return itemSlot;
+        }
+        public override void OnDeactivate() {
+            JailbreakExt.DropItem(Main.LocalPlayer.Center, casingSlot.item);
+            JailbreakExt.DropItem(Main.LocalPlayer.Center, batterySlot.item);
+            JailbreakExt.DropItem(Main.LocalPlayer.Center, lensSlot.item);
+            JailbreakExt.DropItem(Main.LocalPlayer.Center, driveSlot.item.Value);
         }
         public bool CanCraft() {
             if(casingSlot?.item?.IsAir??true) {

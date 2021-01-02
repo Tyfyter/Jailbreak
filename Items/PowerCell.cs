@@ -28,15 +28,29 @@ namespace Jailbreak.Items {
         public const float DefaultRecharge = 1;
         public const float MechMaxCharge = 60;
         public const float MechRecharge = 3;
+        public const float CrimsonHeartMaxCharge = 30;
         public static float maxCharge(Item item){
             if(item.modItem is PowerCellItem powerCell)return powerCell.maxCharge;
             switch(item.type) {
+                case ItemID.CrimsonHeart:
+                return PowerCellGlobalItem.CrimsonHeartMaxCharge;
                 case ItemID.LihzahrdPowerCell:
                 return PowerCellGlobalItem.LihzahrdMaxCharge;
                 case ItemID.MechanicalBatteryPiece:
                 return PowerCellGlobalItem.MechMaxCharge;
             }
             return 0;
+        }
+        public static void modifyContext(Item item, ActionContext context){
+            //if(item.modItem is PowerCellItem powerCell)return powerCell.maxCharge;
+            switch(item.type) {
+                case ItemID.CrimsonHeart:
+                context.delayMult = -1;
+                break;
+                case ItemID.ShadowOrb:
+                context.costMult = -1;
+                break;
+            }
         }
     }
 }

@@ -200,6 +200,7 @@ namespace Jailbreak {
                 modularUIState.Deactivate();
                 modularUIState = null;
 			}
+            Main.playerInventory = true;
             assemblerUIState = new AssemblerUI();
             assemblerUIState.Activate();
             modularUI.SetState(assemblerUIState);
@@ -224,10 +225,17 @@ namespace Jailbreak {
         public delegate ref T getRefDelegate<T>();
         public static bool ToBool(this object value) {
             try {
-                return (long)value!=0;
+                return (float)value!=0;
             } catch(Exception) {
                 return (bool)value;
             }
+        }
+        public static void DropItem(Vector2 position, Item item) {
+            int i = Item.NewItem(Main.LocalPlayer.Center, 1, 1);
+            item.position = position;
+            item.active = true;
+            item.noGrabDelay = 0;
+            Main.item[i] = item;
         }
         #region spritebatch extensions
         static SpriteSortMode sortMode;

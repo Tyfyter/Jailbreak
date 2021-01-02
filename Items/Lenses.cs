@@ -46,7 +46,7 @@ namespace Jailbreak.Items {
         public static void getStats(Item item, Item castingTool, ref float damage, ref float shootSpeed){
             if(item.modItem is LensItem lens) {
                 lens.getStats(castingTool, ref damage, ref shootSpeed);
-            }else switch(item.type) {
+            }else if(!(item is null))switch(item.type) {
                 case ItemID.Ruby:
                 damage*=20;
                 break;

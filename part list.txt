@@ -18,7 +18,7 @@ lenses:
 lens
 sapphire
 ruby (triggered)
-mechanical lens (damaging)
+mechanical lens (damaging, repeating)
 light
 might (triggered)
 fright (damaging)

@@ -148,6 +148,11 @@ namespace Jailbreak.UI
 				item = _item;
 			}
         }
+        public void DecrementStack(int amount = 1) {
+            item = item.Clone();
+            item.stack-=amount;
+            if(item.stack<1)item.TurnToAir();
+        }
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			float oldScale = Main.inventoryScale;
 			Main.inventoryScale = _scale;
@@ -159,7 +164,7 @@ namespace Jailbreak.UI
                     Item item2 = item;
                     ItemSlot.Handle(ref item, _context);
                     if(item!=item2) {
-                        ContentsChangedAction(item2, item);
+                        ContentsChangedAction(item, item2);
                     }
 				}
 			}

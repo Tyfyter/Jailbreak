@@ -63,7 +63,7 @@ namespace Jailbreak.Projectiles {
                         if(!(item is SleepControl)) {//if anyone has a reason why this should be a property instead of being uniqe to SleepControl, please tell me
                             switch(context.delayMult) {
                                 case -1:
-                                delay = 1;
+                                delay = 15;
                                 break;
                                 default:
                                 delay*=context.delayMult;
@@ -89,10 +89,11 @@ namespace Jailbreak.Projectiles {
         public override void OnHitNPC(NPC target, int damage, float knockback, bool crit) {
             context.Target = target;
             if((glyphType&(Paused|OnHit))==(Paused|OnHit))glyphType^=GlyphProjectileType.Paused;
+            if(crit&&(glyphType&Golem)==Golem)ConsumeCharge(-damage/2);
         }
         public override void Kill(int timeLeft) {
             for(int i = 0; i<10; i++) {
-                Dust.NewDustPerfect(projectile.Center, 267, Main.rand.NextVector2Circular(4,4)*Main.rand.NextFloat(0,1), 100, new Color(0, 90, 255), 0.75f).noGravity = true;
+                Dust.NewDustPerfect(projectile.Center, 267, Main.rand.NextVector2Circular(4,4)*Main.rand.NextFloat(0,1), 100, context.color, 0.75f).noGravity = true;
             }
         }
         void ConsumeCharge(float cost) {

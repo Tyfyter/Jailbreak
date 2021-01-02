@@ -68,6 +68,7 @@ namespace Jailbreak.Items {
         public override byte ProjFields => Normal;
         public override void SetDefaults() {
             base.SetDefaults();
+            item.noMelee = true;
             item.damage = 30;
             if(driveItem is null) {
                 driveItem = new Ref<Item>(new Item());
@@ -165,6 +166,7 @@ namespace Jailbreak.Items {
         }
     }
     public class CustomCastingTool : CastingTool {
+        public override bool CloneNewInstances => true;
         public Ref<Item> driveItem;
         public DriveItem drive => driveItem.Value.modItem as DriveItem;
         public Item powerCellItem;
@@ -173,18 +175,25 @@ namespace Jailbreak.Items {
         public CasingItem casing => casingItem.modItem as CasingItem;
         public Item lensItem;
         public override List<ActionItem> Actions => drive.Actions;
-        public override RefWrapper<float> getCharge => (powerCell is null)?powerCellItem.GetGlobalItem<PowerCellGlobalItem>().charge:powerCell.charge;
+        public override RefWrapper<float> getCharge {
+            get {
+                try {
+                    return (powerCell is null) ? powerCellItem.GetGlobalItem<PowerCellGlobalItem>().charge : powerCell.charge;
+                } catch(Exception e) {
+                    return 100;
+                }
+            }
+        }
         public override float maxCharge => PowerCellGlobalItem.maxCharge(powerCellItem);
         public override float chargeRate {
             get {
-                if(!(powerCell is null))return powerCell.maxCharge;
+                if(!(powerCell is null))return 1;//powerCell.;
                 switch(powerCellItem.type) {
                     case ItemID.MechanicalBatteryPiece:
                     return PowerCellGlobalItem.MechRecharge;
                     default:
-                    return PowerCellGlobalItem.DefaultRecharge;
+                    return PowerCellGlobalItem.DefaultRecharge/4;
                 }
-                return 0;
             }
         }
         public override byte ProjFields => LensGlobalItem.projType(lensItem);
@@ -192,6 +201,9 @@ namespace Jailbreak.Items {
             Tooltip.SetDefault("ModifyTooltips please add details");
         }
         public override void SetDefaults() {
+            if(item.owner<0||item.owner>=Main.player.Length||!Main.player[item.owner].active) {
+                return;
+            }
             base.SetDefaults();
             if(driveItem is null) {
                 driveItem = new Ref<Item>(new Item());
@@ -205,6 +217,10 @@ namespace Jailbreak.Items {
                 lensItem = new Item();
                 lensItem.SetDefaults(0);
             }
+            if(casingItem is null) {
+                casingItem = new Item();
+                casingItem.SetDefaults(0);
+            }
             int dmg = item.damage;
             float damage = 1f;
             if(!(casing is null))casing.getStats(item, ref damage);
@@ -215,7 +231,7 @@ namespace Jailbreak.Items {
             }
         }
         public override bool AltFunctionUse(Player player) {
-            return true;
+            return false;//true;
         }
         public override void RightClick(Player player) {
             Jailbreak.instance.OpenModularEditor();
@@ -229,8 +245,8 @@ namespace Jailbreak.Items {
         }
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
             foreach(TooltipLine line in tooltips) {
-                if(line.Name.Equals("Tooltip")||line.Name.Equals("Tooltip1")) {
-                    line.text = $"\ncasing: {casingItem}\npower cell: {powerCellItem}\nlens: {lensItem}\ndrive: {driveItem}";
+                if(line.Name.Equals("Tooltip0")) {
+                    line.text = $"Casing: {casingItem?.Name??"null"}\nPower Cell: {powerCellItem?.Name??"null"}; charge:{getCharge.value}\nLens: {lensItem?.Name??"null"}\nDrive: {driveItem?.Value?.Name??"null"}";
                     break;
                 }
             }
@@ -238,6 +254,7 @@ namespace Jailbreak.Items {
         public override void UpdateInventory(Player player) {
             try {
                 if(powerCellItem is Item i)i.owner = item.owner;
+
                 Recharge();
             } catch(NullReferenceException) {
                 if(driveItem is null) {
@@ -254,7 +271,9 @@ namespace Jailbreak.Items {
             try {
                 return new TagCompound() {
                     {"drive", driveItem.Value},
-                    {"powerCell", powerCellItem}
+                    {"powerCell", powerCellItem},
+                    {"casing", casingItem},
+                    {"lens", lensItem}
                 };
             } catch(Exception) {
                 return new TagCompound();
@@ -267,6 +286,12 @@ namespace Jailbreak.Items {
             if(tag.ContainsKey("powerCell")) {
                 powerCellItem = tag.Get<Item>("powerCell");
             }
+            if(tag.ContainsKey("casing")) {
+                casingItem = tag.Get<Item>("casing");
+            }
+            if(tag.ContainsKey("lens")) {
+                lensItem = tag.Get<Item>("lens");
+            }
             if(driveItem is null) {
                 driveItem = new Ref<Item>(new Item());
                 driveItem.Value.SetDefaults(0);
@@ -274,6 +299,14 @@ namespace Jailbreak.Items {
             if(powerCellItem is null) {
                 powerCellItem = new Item();
                 powerCellItem.SetDefaults(0);
+            }
+            if(casingItem is null) {
+                casingItem = new Item();
+                casingItem.SetDefaults(0);
+            }
+            if(lensItem is null) {
+                lensItem = new Item();
+                lensItem.SetDefaults(0);
             }
         }
         public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack) {
@@ -293,7 +326,6 @@ namespace Jailbreak.Items {
             context.charge = projCharge;
             context.Caster = player;
             context.color = LensGlobalItem.getColor(lensItem);
-
             //((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.charge = projCharge;
             //((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.Caster = player;
             //((BasicGlyphProjectile)Main.projectile[lastProj].modProjectile).context.color = LensGlobalItem.getColor(lensItem);

@@ -12,12 +12,15 @@ using static Jailbreak.JailbreakExt;
 
 namespace Jailbreak.Items {
     public abstract class CasingItem : ModItem {
-        public byte ProjType => Normal;
-        public Color color => new Color(0,90,255);
         public override void SetStaticDefaults() {
             base.SetStaticDefaults();
             Sets.Item.casing[item.type] = true;
         }
+        /*
+        public override void SetDefaults() {
+            item.stack = 99;
+        }//*/
         public virtual void getStats(Item castingTool, ref float damage) {}
     }
+    public class SilverCasing : CasingItem {}
 }
