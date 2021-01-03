@@ -91,15 +91,22 @@ namespace Jailbreak.Items{
     public class AddMotionAction : ActionItem {
         public override float cost => ((Vector2)parameters[1]).Length()*(ReferenceEquals(parameters[0],context.Projectile)?0.25f:1);
         public override object Execute(int i){
-            ModContent.GetInstance<Jailbreak>().Logger.Info(parameters[0].GetType());
-            ModContent.GetInstance<Jailbreak>().Logger.Info(parameters[0] is Entity);
-            ((Entity)parameters[0]).velocity+=(Vector2)parameters[1];
-            if(parameters[0] is Player player) {
-                NetMessage.SendData(MessageID.SyncPlayer, number:player.whoAmI);
-            }else if(parameters[0] is NPC npc) {
-                npc.netUpdate = true;
-            }else if(parameters[0] is Projectile projectile) {
-                projectile.netUpdate = true;
+            //ModContent.GetInstance<Jailbreak>().Logger.Info(parameters[0].GetType());
+            //ModContent.GetInstance<Jailbreak>().Logger.Info(parameters[0] is Entity);
+            Vector2 velocity = (Vector2)parameters[1];
+            Entity target;
+            List<Entity> targets = parameters[0].ToEntityList<Entity>();
+            if(targets is null)return null;
+            for(int j = 0; j < targets.Count; j++) {
+                target = targets[j];
+                target.velocity+=velocity;
+                if(target is Player player) {
+                    NetMessage.SendData(MessageID.SyncPlayer, number: player.whoAmI);
+                } else if(target is NPC npc) {
+                    npc.netUpdate = true;
+                } else if(target is Projectile projectile) {
+                    projectile.netUpdate = true;
+                }
             }
             return null;
         }

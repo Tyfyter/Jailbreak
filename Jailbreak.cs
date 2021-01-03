@@ -3,6 +3,7 @@ using Jailbreak.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,14 +18,13 @@ namespace Jailbreak {
         internal static Dictionary<string,ActionItem> Actions;
         internal static List<ActionItem> actions;
         internal static Jailbreak instance;
-        internal static Jailbreak Instance => instance;
+        public static Jailbreak Instance => instance;
 
 		internal UserInterface UI;
 		public GlyphItemsUI glyphItemUI;
 		internal UserInterface modularUI;
 		public ModularEditorUI modularUIState;
 		public AssemblerUI assemblerUIState;
-        public static Texture2D LiteralBackTexture;
 
 		public Jailbreak() {}
         public override void Load() {
@@ -52,7 +52,8 @@ namespace Jailbreak {
                 { "Pop", new PopParameterOperation() },
                 { "Sleep", new SleepControl() },
                 { "Jump", new JumpIfControl() },
-                { "Goto", new GotoControl() }
+                { "Goto", new GotoControl() },
+                { "NearbyNPCs", new GetNearbyEnemiesOperation() }
             };
             actions = new List<ActionItem>(){};
             foreach(KeyValuePair<string,ActionItem> act in Actions) {
@@ -63,7 +64,7 @@ namespace Jailbreak {
 			if (!Main.dedServ){
 				UI = new UserInterface();
 				modularUI = new UserInterface();
-                LiteralBackTexture = GetTexture("UI/Literal_Back");
+                Textures.LoadAll();
 			}
             Sets.Item.casing = new bool[0];
             Sets.Item.drive = new bool[0];
@@ -84,11 +85,11 @@ namespace Jailbreak {
             glyphItemUI = null;
             modularUIState = null;
             ActionContext.Default = null;
-            LiteralBackTexture = null;
             Sets.Item.casing = null;
             Sets.Item.drive = null;
             Sets.Item.lens = null;
             Sets.Item.battery = null;
+            Textures.UnloadAll();
             instance = null;
         }
         public override void PostUpdateInput() {
@@ -221,6 +222,24 @@ namespace Jailbreak {
             public static bool[] battery;
         }
     }
+    public static class Textures {
+        static Jailbreak mod => Jailbreak.instance;
+        internal static void LoadAll() {
+            LiteralBackTexture = mod.GetTexture("UI/Literal_Back");
+            Item.SlabDrive = mod.GetTexture("Items/SlabDrive");
+            Item.SlabDriveFull = mod.GetTexture("Items/SlabDriveFull");
+        }
+        internal static void UnloadAll() {
+            LiteralBackTexture = null;
+            Item.SlabDrive = null;
+            Item.SlabDriveFull = null;
+        }
+        public static class Item {
+            public static Texture2D SlabDrive;
+            public static Texture2D SlabDriveFull;
+        }
+        public static Texture2D LiteralBackTexture;
+    }
     public static class JailbreakExt {
         public delegate ref T getRefDelegate<T>();
         public static bool ToBool(this object value) {
@@ -229,6 +248,18 @@ namespace Jailbreak {
             } catch(Exception) {
                 return (bool)value;
             }
+        }
+        public static List<T> ToEntityList<T>(this object value) where T : Entity {
+            if(value is T v1) {
+                return new List<T> {v1};
+            }
+            if(value is List<T> v2) {
+                return v2;
+            }
+            if(value is IList v3) {
+                return v3.OfType<T>().ToList<T>();
+            }
+            return null;
         }
         public static void DropItem(Vector2 position, Item item) {
             int i = Item.NewItem(Main.LocalPlayer.Center, 1, 1);

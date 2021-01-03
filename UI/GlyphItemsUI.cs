@@ -24,6 +24,7 @@ namespace Jailbreak.UI {
         protected internal int literalIndex = -1;
         protected internal ActionItem LiteralTarget;
 		public LiteralElement literalUI;
+        public int currIndex = 0;
         public override void OnInitialize(){
             int l = 1;
             if(drive!=null){
@@ -38,9 +39,14 @@ namespace Jailbreak.UI {
             int layers = 0;
             int xPos = 0;
             for (int i = 0; i < l; i++){
-                if(i>=itemSlots.Count)itemSlots.Add(null);
+                currIndex = i;
+                if(drive.Readonly&&drive.Actions.Count<=i)break;
+                if(i>=itemSlots.Count) {
+                    itemSlots.Add(null);
+                }
                 current = drive.Actions.Count>i?drive.Actions[i]:null;
-                itemSlots[i] = new GlyphItemSlot(scale: 0.75f, context: drive.Readonly ? ItemSlot.Context.CraftingMaterial : ItemSlot.Context.InventoryItem) {
+                itemSlots[i] = new GlyphItemSlot(scale: 0.75f, context: drive.Readonly ? ItemSlot.Context.CraftingMaterial : ItemSlot.Context.InventoryItem,
+                    colorContext: drive.Readonly ? ItemSlot.Context.TrashItem : ItemSlot.Context.CraftingMaterial) {
                     Left = { Pixels = (float)((Main.screenWidth*0.05)+(xPos++*40*scale.X)) },
                     Top = { Pixels = (float)((Main.screenHeight*0.4)+(layers*40*scale.Y)) },
                     ValidItemFunc = item => item.IsAir || (!item.IsAir && (item.modItem is ActionItem)),

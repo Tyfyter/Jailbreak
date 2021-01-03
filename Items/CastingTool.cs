@@ -27,6 +27,7 @@ namespace Jailbreak.Items {
             item.shoot = ModContent.ProjectileType<BasicGlyphProjectile>();
             item.shootSpeed = 9.5f;
             item.useAnimation = item.useTime = 30;
+            item.noMelee = true;
         }
         public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack) {
             BasicGlyphProjectile projectile = (BasicGlyphProjectile)Projectile.NewProjectileDirect(position, new Vector2(speedX, speedY), item.shoot, damage, knockBack, player.whoAmI).modProjectile;
@@ -68,7 +69,6 @@ namespace Jailbreak.Items {
         public override byte ProjFields => Normal;
         public override void SetDefaults() {
             base.SetDefaults();
-            item.noMelee = true;
             item.damage = 30;
             if(driveItem is null) {
                 driveItem = new Ref<Item>(new Item());
@@ -198,7 +198,8 @@ namespace Jailbreak.Items {
         }
         public override byte ProjFields => LensGlobalItem.projType(lensItem);
         public override void SetStaticDefaults() {
-            Tooltip.SetDefault("ModifyTooltips please add details");
+            //Terraria.ModLoader.ModContent.GetInstance<Jailbreak.Items.CustomCastingTool>().SetStaticDefaults();
+            Tooltip.SetDefault("ModifyTooltips please add details\nlens\ndrive");
         }
         public override void SetDefaults() {
             if(item.owner<0||item.owner>=Main.player.Length||!Main.player[item.owner].active) {
@@ -246,15 +247,24 @@ namespace Jailbreak.Items {
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
             foreach(TooltipLine line in tooltips) {
                 if(line.Name.Equals("Tooltip0")) {
-                    line.text = $"Casing: {casingItem?.Name??"null"}\nPower Cell: {powerCellItem?.Name??"null"}; charge:{getCharge.value}\nLens: {lensItem?.Name??"null"}\nDrive: {driveItem?.Value?.Name??"null"}";
+                    line.text = $"Casing: {casingItem?.Name??"null"}\nPower Cell: {powerCellItem?.Name??"null"}; charge:{getCharge.value}";
+                } else
+                if(line.Name.Equals("Tooltip1")) {
+                    line.text = $"Lens: {lensItem?.Name??"null"}";
+                    line.overrideColor = LensGlobalItem.getColor(lensItem);
+                }else
+                if(line.Name.Equals("Tooltip2")) {
+                    string name = driveItem?.Value?.Name;
+                    if(string.IsNullOrWhiteSpace(name))name = "none";
+                    line.text = $"Drive: {name}";
                     break;
                 }
             }
         }
         public override void UpdateInventory(Player player) {
             try {
+                if(item.useStyle == 0&&!(item.owner<0||item.owner>=Main.player.Length||!Main.player[item.owner].active))SetDefaults();
                 if(powerCellItem is Item i)i.owner = item.owner;
-
                 Recharge();
             } catch(NullReferenceException) {
                 if(driveItem is null) {
@@ -310,6 +320,7 @@ namespace Jailbreak.Items {
             }
         }
         public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack) {
+            if(drive is null)return false;
             float c = maxCharge;
             RefWrapper<float> projCharge = getCharge;
             //Main.NewText($"{getCharge}/{c}");

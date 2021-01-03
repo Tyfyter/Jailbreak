@@ -23,8 +23,8 @@ namespace Jailbreak.UI {
         protected internal static bool focused = false;
         public LiteralElement(float scale) : base() {
             scale/=0.75f;
-			Width.Set(Jailbreak.LiteralBackTexture.Width * scale, 0f);
-			Height.Set(Jailbreak.LiteralBackTexture.Height * scale, 0f);
+			Width.Set(Textures.LiteralBackTexture.Width * scale, 0f);
+			Height.Set(Textures.LiteralBackTexture.Height * scale, 0f);
         }
         /*public override void Update(GameTime gameTime) {
             if(focused)DoKeyboardInput();
@@ -78,7 +78,7 @@ namespace Jailbreak.UI {
             Color color = new Color(c, c, c, c); //new Color(255, 255, 255) : new Color(180, 180, 180);
 		    Vector2 position = new Vector2(dimensions.X, dimensions.Y);
             //Vector2 scale = new Vector2(dimensions.Width/Main.inventoryBack9Texture.Width, dimensions.Height/Main.inventoryBack9Texture.Height);
-            Texture2D texture = Jailbreak.LiteralBackTexture;
+            Texture2D texture = Textures.LiteralBackTexture;
             spriteBatch.Draw(texture, position + new Vector2(0f, 2f), null, color, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
             string text = value;
             spriteBatch.DrawString(Main.fontMouseText, text, position+new Vector2(dimensions.Width-Main.fontMouseText.MeasureString(text).X, 0), Main.mouseTextColorReal, 0f, default, (dimensions.Width/texture.Width)*0.75f, SpriteEffects.None, 0f);

@@ -75,8 +75,9 @@ namespace Jailbreak.Projectiles {
                         context.lastReturn = ret??context.lastReturn;
                     } else {
                         context.Cursor = actions.Count;
+                        mod.Logger.Info($"Didn't have {cost} charge for {item.GetType()} at {context.Cursor}");
                     }
-                } catch(Exception) {
+                } catch(InvalidTimeZoneException) {
                     projectile.Kill();
                     return;
                 }

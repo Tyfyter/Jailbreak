@@ -52,7 +52,7 @@ namespace Jailbreak.UI
                     // Handle handles all the click and hover actions based on the context.
                     ActionItem item = null;
                     if(this.item?.modItem is ActionItem action) item = action;
-                    ItemSlot.Handle(ref this.item, _context);
+                    ItemSlot.Handle(ref this.item, PlayerInput.Triggers.JustPressed.MouseRight?0:_context);
                     ActionItem item2 = null;
                     if(this.item?.modItem is ActionItem action2) item2 = action2;
                     GlyphItemsUI parent = ((GlyphItemsUI)Parent);

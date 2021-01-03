@@ -284,4 +284,30 @@ namespace Jailbreak.Items {
             return index+"";
         }
     }
+    public class GetNearbyEnemiesOperation : ActionItem {
+        public override float cost => (float)parameters[(parameters[0] is Vector2||parameters[0] is Entity)?1:0];
+        public override float delay => 2;
+        public override ActionType Type => ActionType.Operation;
+        public override object Execute(int i){
+            Vector2 position = context.Projectile.Center;
+            int rangeIndex = 0;
+            if(parameters[0] is Vector2 vec) {
+                position = vec;
+                rangeIndex++;
+            }else if(parameters[0] is Entity ent) {
+                position = ent.Center;
+                rangeIndex++;
+            }
+            float range = (float)parameters[rangeIndex]*16;
+            List<NPC> targets = new List<NPC>{};
+            NPC targ;
+            for(int n = 0; n<Main.maxNPCs; n++) {
+                targ = Main.npc[n];
+                if(targ.active&&targ.CanBeChasedBy()&&(targ.Center-position).Length()<range) {
+                    targets.Add(targ);
+                }
+            }
+            return targets;
+        }
+    }
 }
